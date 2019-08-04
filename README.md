@@ -16,10 +16,6 @@
 
 4. 数据库名：
 
-5. 如果在 DataGrip 下配置，则配置的界⾯
-   如图:
-
-   ![1564927574522](C:\Users\baideqian\AppData\Roaming\Typora\typora-user-images\1564927574522.png)
 
 # 2. 模型层
 
