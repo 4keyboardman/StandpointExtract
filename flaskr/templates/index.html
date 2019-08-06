@@ -9,55 +9,11 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
           integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <style type="text/css">
-
         html, body {
             width: 100%;
             height: 100%;
             padding: 0;
             margin: 0;
-        }
-
-        #main {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-        }
-
-        .container-fluid {
-            flex: 1;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-        }
-
-        .left-row {
-            height: 100%;
-            width: 100%;
-        }
-
-        .left-col {
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-        }
-
-        .left-form-group {
-            display: flex;
-            width: 100%;
-            height: 100%;
-            justify-content: flex-start;
-            align-items: flex-start;
-            flex-direction: column;
-            margin: 0;
-        }
-
-        .left-form-group .navbar {
-            width: 100%;
-        }
-
-        .left-form-group textarea {
-            height: 100%;
         }
 
         .entity {
@@ -67,80 +23,79 @@
     </style>
 </head>
 <body>
-<div id="main">
+<div class="container-fluid p-0 h-100 d-flex flex-column">
     <nav class="navbar navbar-dark bg-dark">
         <!-- Navbar content -->
-        <a class="navbar-brand" href="#">导航</a>
+        <a class="navbar-brand" href="#">新闻人物言论自动提取</a>
     </nav>
-    <div class="container-fluid p-0">
 
-        <div class="row left-row">
-            <div class="col left-col border-right p-3">
-                <div class="form-group left-form-group">
-                    <nav class="navbar navbar-light bg-light">
-                        <label for="input-text">exampleFormControlTextarea1</label>
-                        <button id="submit" class="btn btn-outline-success " type="submit"> &nbsp;&nbsp;提交&nbsp;&nbsp;</button>
-                    </nav>
-                    <textarea class="form-control" id="input-text" rows="15"></textarea>
-                </div>
+    <div class="row m-0 h-100">
+        <div class="col h-100 border-right p-3">
+            <div class="form-group d-flex flex-column h-100">
+                <nav class="navbar navbar-light bg-light w-100">
+                    <label for="input-text">exampleFormControlTextarea1</label>
+                    <button id="submit" class="btn btn-outline-success " type="submit"> &nbsp;&nbsp;提交&nbsp;&nbsp;</button>
+                </nav>
+                <textarea class="form-control h-100" id="input-text"></textarea>
             </div>
-            <div class="col p-3">
-                <div class="row">
-                    <div id="extract_table" class="col">
-                        <!--
-                        <table class="table table-striped table-responsive">
-                            <thead class="thead-light">
-                            <tr>
-                                <th scope="col">#</th>
-                                <th scope="col">人物</th>
-                                <th scope="col">言论</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr>
-                                <th scope="row">1</th>
-                                <td class="entity">韩国⽹网友</td>
-                                <td>不不以为然不不以为然不不以为然不不以为然不不以为然不不以为然不不以为然
-                                    不不以为然不不以为然不不以为然不不以为然不不以为然不不以为然不不以为然
-                                    不不以为然不不以为然不不以为然不不以为然不不以为然不不以为然不不以为然
-                                    不不以为然不不以为然不不以为然不不以为然不不以为然不不以为然不不以为然</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">2</th>
-                                <td class="entity">雷先生</td>
-                                <td>交警部门罚了他 16 次，他只认了一次，
-                                    交了一次罚款， 拿到法
-                                    院的判决书后，会前往交警队，要求撤销
-                                    此前的处罚。
-                                    交警部门罚了他 16 次，他只认了一次，
-                                    交了一次罚款， 拿到法
-                                    院的判决书后，会前往交警队，要求撤销
-                                    此前的处罚。
-                                    交警部门罚了他 16 次，他只认了一次，
-                                    交了一次罚款， 拿到法
-                                    院的判决书后，会前往交警队，要求撤销
-                                    此前的处罚。
-                                </td>
-                            </tr>
-                            <tr>
-                                <th scope="row">3</th>
-                                <td class="entity">Larry</td>
-                                <td>the Bird</td>
-                            </tr>
-                            </tbody>
-                        </table>
-                        -->
-                    </div>
-                    <div class="w-100 d-none d-md-block">
+        </div>
+        <div class="col p-3 h-100">
+            <div class="row">
+                <div id="extract_table" class="col">
+                    <!--
+                    <table class="table table-striped table-responsive">
+                        <thead class="thead-light">
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">人物</th>
+                            <th scope="col">言论</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <th scope="row">1</th>
+                            <td class="entity">韩国⽹网友</td>
+                            <td>不不以为然不不以为然不不以为然不不以为然不不以为然不不以为然不不以为然
+                                不不以为然不不以为然不不以为然不不以为然不不以为然不不以为然不不以为然
+                                不不以为然不不以为然不不以为然不不以为然不不以为然不不以为然不不以为然
+                                不不以为然不不以为然不不以为然不不以为然不不以为然不不以为然不不以为然</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">2</th>
+                            <td class="entity">雷先生</td>
+                            <td>交警部门罚了他 16 次，他只认了一次，
+                                交了一次罚款， 拿到法
+                                院的判决书后，会前往交警队，要求撤销
+                                此前的处罚。
+                                交警部门罚了他 16 次，他只认了一次，
+                                交了一次罚款， 拿到法
+                                院的判决书后，会前往交警队，要求撤销
+                                此前的处罚。
+                                交警部门罚了他 16 次，他只认了一次，
+                                交了一次罚款， 拿到法
+                                院的判决书后，会前往交警队，要求撤销
+                                此前的处罚。
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">3</th>
+                            <td class="entity">Larry</td>
+                            <td>the Bird</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    -->
+                </div>
+                <div class="w-100 d-none d-md-block">
                     <hr class="my-4">
                 </div>
-                    <div class="col">
-                        <!-- 图谱 -->
-                    </div>
+                <div class="col">
+                    <!-- 图谱 -->
                 </div>
             </div>
         </div>
     </div>
+
     <footer class="page-footer font-small blue  border-top">
         <!-- Copyright -->
         <div class="footer-copyright text-center py-3">© 2019 Copyright:
