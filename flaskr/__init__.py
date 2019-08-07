@@ -47,7 +47,6 @@ def create_app(test_config=None):
         request_info = {'ip': request.remote_addr,
                         'path': request.path,
                         'form': {k: v for k, v in request.form.items()},
-                        'data': repr(request.data),
                         'args': {k: v for k, v in request.args.items()},
                         'headers': {k: v for k, v in request.headers.items()}}
         app.logger.info(request_info)
