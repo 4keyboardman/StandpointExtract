@@ -1,6 +1,8 @@
 import os
-
+import logging
+from logging import handlers
 from flask import Flask
+from flask import request
 
 
 def create_app(test_config=None):
@@ -12,6 +14,15 @@ def create_app(test_config=None):
         # store the database in the instance folder
         DATABASE=os.path.join(app.instance_path, "flaskr.sqlite"),
     )
+
+    log_handler = handlers.TimedRotatingFileHandler('logs/flaskr.log', 'D', 1, 0, encoding='utf-8')
+    log_handler.suffix = "%Y-%m-%d"
+    log_handler.setLevel('DEBUG')
+    fmt = "[%(asctime)-15s] [%(levelname)s] [%(pathname)s.%(funcName)s:%(lineno)d] [%(process)d] - %(message)s"
+    datefmt = '%Y-%m-%d %H:%M:%S'
+    formatter = logging.Formatter(fmt, datefmt)
+    log_handler.setFormatter(formatter)
+    app.logger.addHandler(log_handler)
 
     if test_config is None:
         # load the instance config, if it exists, when not testing
@@ -30,6 +41,16 @@ def create_app(test_config=None):
     @app.route("/hello")
     def hello():
         return "Hello, World!"
+
+    @app.before_request
+    def before_request():
+        request_info = {'ip': request.remote_addr,
+                        'path': request.path,
+                        'form': {k: v for k, v in request.form.items()},
+                        'data': repr(request.data),
+                        'args': {k: v for k, v in request.args.items()},
+                        'headers': {k: v for k, v in request.headers.items()}}
+        app.logger.info(request_info)
 
     # register the database commands
     from flaskr import db
