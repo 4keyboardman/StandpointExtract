@@ -3,7 +3,7 @@
 - flask文档：https://dormousehole.readthedocs.io/en/latest/
 ## 基础目标
 - 输入: 一段新闻文本(Text)
-- 输出: 文中每个⼈人物/实体的观点(List)
+- 输出: 文中每个人物/实体的观点(List)
 ## 挑战目标
 基于实体观点，构建实体观点图谱并可视化
 
