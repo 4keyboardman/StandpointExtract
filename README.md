@@ -1,5 +1,6 @@
 # 新闻人物言论自动提取
 ## 线上地址：http://47.105.82.234/
+- flask文档：https://dormousehole.readthedocs.io/en/latest/
 ## 基础目标
 输入一段文本，输出实体观点
 ## 挑战目标
