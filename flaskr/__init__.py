@@ -39,11 +39,11 @@ def create_app(test_config=None):
         db.init_db()
 
     # apply the blueprints to the app
-    from flaskr import auth, blog, extractor
+    from flaskr import auth, blog, extractor_controller
 
     app.register_blueprint(auth.bp)
     app.register_blueprint(blog.bp)
-    app.register_blueprint(extractor.bp)
+    app.register_blueprint(extractor_controller.bp)
 
     # make url_for('index') == url_for('blog.index')
     # in another app, you might define a separate main index here with
