@@ -15,15 +15,19 @@ def create_app(test_config=None):
         DATABASE=os.path.join(app.instance_path, "flaskr.sqlite"),
     )
 
+    # 日志配置
+    if not os.path.isdir('logs'):
+        os.mkdir('logs')
     log_handler = handlers.TimedRotatingFileHandler('logs/flaskr.log', 'D', 1, 0, encoding='utf-8')
     log_handler.suffix = "%Y-%m-%d"
     log_handler.setLevel('DEBUG')
-    fmt = "[%(asctime)-15s] [%(levelname)s] [%(pathname)s.%(funcName)s:%(lineno)d] [%(process)d] - %(message)s"
+    fmt = "[%(asctime)-15s] [%(levelname)s] [%(filename)s.%(funcName)s:%(lineno)d] [%(process)d] - %(message)s"
     datefmt = '%Y-%m-%d %H:%M:%S'
     formatter = logging.Formatter(fmt, datefmt)
     log_handler.setFormatter(formatter)
     app.logger.addHandler(log_handler)
 
+    # 加载配置
     if test_config is None:
         # load the instance config, if it exists, when not testing
         app.config.from_pyfile("config.py", silent=True)
@@ -42,6 +46,7 @@ def create_app(test_config=None):
     def hello():
         return "Hello, World!"
 
+    # 日志输出拦截器
     @app.before_request
     def before_request():
         request_info = {'ip': request.remote_addr,
@@ -54,13 +59,14 @@ def create_app(test_config=None):
     # register the database commands
     from flaskr import db
 
+    # 初始化数据库
     db.init_app(app)
     with app.app_context():
         db.init_db()
 
     # apply the blueprints to the app
     from flaskr import auth, blog, extractor_controller
-
+    # 注册蓝图
     app.register_blueprint(auth.bp)
     app.register_blueprint(blog.bp)
     app.register_blueprint(extractor_controller.bp)
