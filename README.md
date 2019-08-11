@@ -5,6 +5,8 @@
 - hanlp在线演示：http://hanlp.com/
 - 普林斯顿句子向量论文：https://openreview.net/forum?id=SyK00v5xx
 - 论文代码：https://github.com/PrincetonML/SIF
+- 论文解读：https://blog.csdn.net/sinat_31188625/article/details/72677088#commentsedit
+- 解读代码：https://github.com/jx00109/sentence2vec/blob/master/s2v-python3.py
 - 云浮科技句法分析：https://www.yunfutech.com/demo?tab=1
 ## 基础目标
 - 输入: 一段新闻文本(Text)
