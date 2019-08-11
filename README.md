@@ -1,6 +1,11 @@
 # 新闻人物言论自动提取
 ## 线上地址：http://47.105.82.234/
 - flask文档：https://dormousehole.readthedocs.io/en/latest/
+- pyhanlp：https://github.com/hankcs/pyhanlp
+- hanlp在线演示：http://hanlp.com/
+- 普林斯顿句子向量论文：https://openreview.net/forum?id=SyK00v5xx
+- 论文代码：https://github.com/PrincetonML/SIF
+- 云浮科技句法分析：https://www.yunfutech.com/demo?tab=1
 ## 基础目标
 - 输入: 一段新闻文本(Text)
 - 输出: 文中每个人物/实体的观点(List)
