@@ -1,5 +1,6 @@
 # 新闻人物言论自动提取
 ## 线上地址：http://47.105.82.234/
+### 参考资料
 - flask文档：https://dormousehole.readthedocs.io/en/latest/
 - pyhanlp：https://github.com/hankcs/pyhanlp
 - hanlp在线演示：http://hanlp.com/
