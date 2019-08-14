@@ -58,11 +58,8 @@ def create_app(test_config=None):
 
     # register the database commands
     from flaskr import db
-
     # 初始化数据库
     db.init_app(app)
-    with app.app_context():
-        db.init_db()
 
     # apply the blueprints to the app
     from flaskr import auth, blog, extractor_controller
@@ -76,5 +73,9 @@ def create_app(test_config=None):
     # app.route, while giving the blog blueprint a url_prefix, but for
     # the tutorial the blog will be the main index
     app.add_url_rule("/", endpoint="index")
+
+    # 初始化word2vec模型
+    from flaskr import nlp_model
+    nlp_model.init_model(app)
 
     return app
