@@ -52,6 +52,21 @@ class WordModel:
         self.word2vec_model = word2vec_model
 
 
+def gen_say_words(word2vec_model, path, initial_words):
+    say_words = get_related_words(initial_words, word2vec_model)
+    with open(path, 'w') as f:
+        for w in say_words:
+            f.write(w + '\n')
+
+
+def load_say_words(path):
+    say_words = []
+    with open(path) as f:
+        for line in f:
+            say_words.append(line.strip())
+    return say_words
+
+
 def init_model(app: Flask):
     """
     初始化word2vec模型
@@ -65,7 +80,10 @@ def init_model(app: Flask):
     app.logger.info('load word2vec model success.')
     # 获取说相近的词
     app.logger.info('getting say words...')
-    say_words = get_related_words(['说', '透露', '表示', '强调', '宣称', '提出', '指出'], word2vec_model)
+    say_words_path = r'resource/say_words'
+    if not os.path.isfile(say_words_path):
+        gen_say_words(word2vec_model, say_words_path, ['说', '透露', '表示', '强调', '宣称', '提出', '指出'])
+    say_words = load_say_words(say_words_path)
     app.logger.info('get say words success.')
 
     app.word_model = WordModel(word2vec_model, say_words)
