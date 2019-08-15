@@ -14,12 +14,8 @@ you're reading.** You probably want the latest tagged version, but the
 default Git version is the master branch. ::
 
     # clone the repository
-    $ git clone https://github.com/pallets/flask
-    $ cd flask
-    # checkout the correct version
-    $ git tag  # shows the tagged versions
-    $ git checkout latest-tag-found-above
-    $ cd examples/tutorial
+    $ git clone https://github.com/4keyboardman/StandpointExtract.git
+    $ cd StandpointExtract
 
 Create a virtualenv and activate it::
 
@@ -49,14 +45,12 @@ Run
 
     $ export FLASK_APP=flaskr
     $ export FLASK_ENV=development
-    $ flask init-db
     $ flask run
 
 Or on Windows cmd::
 
     > set FLASK_APP=flaskr
     > set FLASK_ENV=development
-    > flask init-db
     > flask run
 
 Open http://127.0.0.1:5000 in a browser.
