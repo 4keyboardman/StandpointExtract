@@ -8,6 +8,6 @@ def extract(text: str) -> [['entity', 'standpoint']]:
     :param text:
     :return:
     """
-    return view_extract.extract(text, current_app.word_model)
+    return view_extract.extract(text, current_app.word_model.say_words, current_app.word_model.sif_model)
 
 

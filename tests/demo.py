@@ -1,5 +1,6 @@
-import json
-
-data = {"k": "中文"}
-print(json.dumps(data))
+for i in range(10):
+    print(i)
+    i *= 2
+    print(i)
+    print("*" * 30)
 

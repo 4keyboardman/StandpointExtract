@@ -6,7 +6,9 @@ import pytest
 from flaskr import create_app
 from flaskr.db import get_db
 from flaskr.db import init_db
+from flaskr import nlp_model
 
+os.chdir("..")
 # read in SQL for populating test data
 with open(os.path.join(os.path.dirname(__file__), "data.sql"), "rb") as f:
     _data_sql = f.read().decode("utf8")
@@ -60,3 +62,14 @@ class AuthActions(object):
 @pytest.fixture
 def auth(client):
     return AuthActions(client)
+
+
+@pytest.fixture(scope="session", params=[r"instance/model/word2vec.model"])
+def sif_model(request):
+    word_model = nlp_model.load_model(request.param)
+    return word_model.sif_model
+
+
+@pytest.fixture(scope="session", params=[r"resource/say_words"])
+def say_words(request):
+    return nlp_model.load_say_words(request.param)
