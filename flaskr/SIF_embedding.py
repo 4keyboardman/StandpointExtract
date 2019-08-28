@@ -174,8 +174,14 @@ class SIFModel:
         self.weight4ind = getWeight(self.word_index_map, word2weight)
 
     def sentence_similarity(self, s1, s2):
-        s1_embdding = self.sentence2vec([s1])[0]
-        s2_embdding = self.sentence2vec([s2])[0]
+        if type(s1) == list:
+            s1_embdding = self.sentence2vec(s1)[0]
+        else:
+            s1_embdding = self.sentence2vec([s1])[0]
+        if type(s2) == list:
+            s2_embdding = self.sentence2vec(s2)[0]
+        else:
+            s2_embdding = self.sentence2vec([s2])[0]
         return self.similarity(s1_embdding, s2_embdding)
 
     @staticmethod
