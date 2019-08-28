@@ -34,7 +34,9 @@
             <div class="form-group d-flex flex-column h-100">
                 <nav class="navbar navbar-light bg-light w-100">
                     <label for="input-text">请输入一段文字</label>
-                    <button id="submit" class="btn btn-outline-success " type="submit"> &nbsp;&nbsp;提交&nbsp;&nbsp;</button>
+                    <button id="submit" class="btn btn-outline-success" type="submit">
+                        &nbsp;提交
+                    </button>
                 </nav>
                 <textarea class="form-control h-100" id="input-text"></textarea>
             </div>
@@ -121,7 +123,7 @@
         "世界是不一样的。就是说它最后一个对人类最大的贡献是安卓。在这安卓以后，说它又贡献了什么了不得的东西，我也想不出来对人（类）有关。它的管理很混乱，" +
         "最典型的就是它的云计算的策略，你可以看到，这中间的换人，权利的斗争等等这些东西，多少而且有点丑。谷歌之所以说有时候发展不行，" +
         "跟这个CEO（桑达尔˙皮查伊）平庸也有很大的关系。”\n" +
-        "吴军表说：“百度从七八年前起，其实基本上已经属于一个僵化的公司了，已经没有希望了。" +
+        "吴军表示：“百度从七八年前起，其实基本上已经属于一个僵化的公司了，已经没有希望了。" +
         "百度的二号人物永远是离职的。很多技术它都是起的大早，赶了个晚集。移动互联网时代它完全落伍了，可以讲完全不具有移动互联网的基因，" +
         "所以做这种转变没有任何意义。说句不好听的，已经没有希望了。说句不好听的，陆奇都救不了它，没人救得了它。这家公司已经基本是不属于我们平时关注的对象了。”\n" +
         "吴军，原腾讯副总裁。吴军也是当前Google中日韩文搜索算法的主要设计者。著有《数学之美》、《浪潮之巅》和《文明之光》等畅销书。\n" +
@@ -135,8 +137,13 @@
             $.post($SCRIPT_ROOT + '/extract', {
                 text: input_test.val()
             }, function (data) {
+                $('#submit').html('&nbsp;提交&nbsp;');
                 $('#extract_table').html(data)
             });
+            spinner = '&nbsp;&nbsp;&nbsp;<div class="spinner-border spinner-border-sm" role="status">\n' +
+                    '<span class="sr-only">Loading...</span>\n' +
+                    '</div>&nbsp;&nbsp;&nbsp;';
+            $('#submit').html(spinner);
             return false;
         });
 

@@ -1,5 +1,3 @@
-import json
-
-data = {"k": "中文"}
-print(json.dumps(data))
+l = []
+print(type(l) == list)
 

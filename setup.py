@@ -18,6 +18,6 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
-    install_requires=["flask", 'sqlalchemy', 'werkzeug'],
+    install_requires=["flask", 'sqlalchemy', 'werkzeug', 'pyhanlp', 'gensim', 'scikit-learn', 'numpy', 'jieba'],
     extras_require={"test": ["pytest", "coverage"]},
 )
