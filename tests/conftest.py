@@ -7,6 +7,7 @@ from flaskr import create_app
 from flaskr.db import get_db
 from flaskr.db import init_db
 from flaskr import nlp_model
+from flaskr import speck_classifier
 
 os.chdir("..")
 # read in SQL for populating test data
@@ -73,3 +74,9 @@ def sif_model(request):
 @pytest.fixture(scope="session", params=[r"resource/say_words"])
 def say_words(request):
     return nlp_model.load_say_words(request.param)
+
+
+@pytest.fixture(scope="session", params=[(r"instance/vocabulary.txt", r"instance/rnn_model")])
+def rnn_net(request):
+    vocab = speck_classifier.load_vocabulary(request.param[0])
+    return speck_classifier.load_model(request.param[1], vocab)

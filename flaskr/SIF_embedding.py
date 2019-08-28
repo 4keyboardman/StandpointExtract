@@ -1,20 +1,7 @@
-import re
-import jieba
+from flaskr.utils import *
+
 import numpy as np
 from sklearn.decomposition import TruncatedSVD
-
-
-def preprocess(sentence, stop_words=None):
-    if stop_words is None:
-        stop_words = set()
-
-    def token(string):
-        return ' '.join(re.findall(r'[\d|\w]+', string))
-
-    def cut(text):
-        return [w for w in jieba.lcut(token(text)) if len(w.strip()) > 0 and w not in stop_words]
-
-    return cut(sentence)
 
 
 def get_weighted_average(We, x, w):
@@ -204,7 +191,7 @@ class SIFModel:
         :param sentences:
         :return:
         """
-        sens = [preprocess(s, self.stop_words) for s in sentences]
+        sens = [cut(s, self.stop_words) for s in sentences]
         x, m = sentences2idx(sens, self.word_index_map)
         w = seq2weight(x, m, self.weight4ind)
         p = params()

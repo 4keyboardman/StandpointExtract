@@ -1,9 +1,7 @@
-import re
 from functools import lru_cache
 
-import jieba
+from flaskr.utils import *
 from pyhanlp import *
-import jieba.posseg as psg
 
 
 def parse_sentence(sentence):
@@ -73,45 +71,6 @@ def check_word(parsed_sentence, root_id, speaker_id, word):
     if word.HEAD.ID == root_id and word.DEPREL not in except_relation:
         return True  # 找到
     return check_word(parsed_sentence, root_id, speaker_id, word.HEAD)
-
-
-def cut_sentences(para):
-    """
-    分句
-    :param para:
-    :return:
-    """
-    para = re.sub(r'([。！？\?])([^”’])', r"\1\n\2", para)  # 单字符断句符
-    para = re.sub(r'(\.{6})([^”’])', r"\1\n\2", para)  # 英文省略号r
-    para = re.sub(r'(\…{2})([^”’])', r"\1\n\2", para)  # 中文省略号
-    para = re.sub(r'([。！？\?][”’])([^，。！？\?])', r'\1\n\2', para)
-    # 如果双引号前有终止符，那么双引号才是句子的终点，把分句符\n放到双引号后，注意前面的几句都小心保留了双引号
-    para = para.rstrip()  # 段尾如果有多余的\n就去掉它
-    # 很多规则中会考虑分号;，但是这里我把它忽略不计，破折号、英文双引号等同样忽略，需要的再做些简单调整即可。
-    return para.split("\n")
-
-
-def process_sentence(sentence):
-    """
-    句子分词
-    :param sentence:
-    :return:
-    """
-    exclude_flags = {'eng', 'x'}
-    return [p.word for p in psg.lcut(sentence) if not any([p.flag.startswith(flag) for flag in exclude_flags])]
-
-
-def preprocess_sentence(sentence, stop_words=None):
-    if stop_words is None:
-        stop_words = set()
-
-    def token(string):
-        return ' '.join(re.findall(r'[\d|\w]+', string))
-
-    def cut(text):
-        return [w for w in jieba.lcut(token(text)) if len(w.strip()) > 0 and w not in stop_words]
-
-    return cut(sentence)
 
 
 def extract(text, say_words, sif_model):

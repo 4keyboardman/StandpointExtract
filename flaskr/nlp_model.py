@@ -1,8 +1,11 @@
 import os
 
+from flaskr import SIF_embedding
+from flaskr import speck_classifier
+from flaskr import extractor
+
 from flask import Flask
 from gensim.models import Word2Vec
-from flaskr import SIF_embedding
 
 
 def get_related_words(initial_words, model):
@@ -43,18 +46,6 @@ def get_related_words(initial_words, model):
     return [n.name for n in sorted(seen.values(), key=lambda o: o.weight, reverse=True)[:100]]
 
 
-class WordModel:
-    """
-    词向量模型数据，放到应用上下文中作为全局变量
-    """
-
-    def __init__(self, word2vec_model, say_words, stop_words):
-        self.say_words = say_words
-        self.stop_words = stop_words
-        self.word2vec_model = word2vec_model
-        self.sif_model = SIF_embedding.SIFModel(word2vec_model, stop_words)
-
-
 def gen_say_words(word2vec_model, path, initial_words):
     say_words = get_related_words(initial_words, word2vec_model)
     with open(path, 'w') as f:
@@ -62,45 +53,86 @@ def gen_say_words(word2vec_model, path, initial_words):
             f.write(w + '\n')
 
 
-def load_say_words(path):
-    say_words = []
-    with open(path, encoding="utf-8") as f:
-        for line in f:
-            say_words.append(line.strip())
-    return say_words
+def load_say_words(w2v_model, say_words_path, init_say_words_path):
+    def read(path):
+        with open(path, encoding="utf-8") as f:
+            data = [line.strip() for line in f]
+        return data
+
+    if not os.path.isfile(say_words_path):
+        gen_say_words(w2v_model, say_words_path, read(init_say_words_path))
+    return read(say_words_path)
 
 
 def load_stop_words(path):
     stop_words = set()
+    if not os.path.isfile(path):
+        return stop_words
     with open(path, encoding="utf-8") as f:
         for line in f:
             stop_words.add(line.strip())
     return stop_words
 
 
-def load_model(model_path):
+def load_sif_model(word2vec_model, stop_words):
+    return SIF_embedding.SIFModel(word2vec_model, stop_words)
+
+
+def load_rnn_model(vocab_path, rnn_model_path):
+    vocab = speck_classifier.load_vocabulary(vocab_path)
+    return speck_classifier.load_model(rnn_model_path, vocab)
+
+
+class NLPModel:
     """
-    加载word2vec模型，并获取计算SIF_embdding所需的权重
-    :param model_path:  模型文件路径
-    :return:
+    全局模型参数
     """
-    # 加载word2vec模型
-    w2v_model = Word2Vec.load(model_path)
-    # 获取说相近的词
-    say_words_path = r'resource/say_words'
-    if not os.path.isfile(say_words_path):
-        gen_say_words(w2v_model, say_words_path, ['说', '透露', '表示', '强调', '宣称', '提出', '指出'])
-    say_words = load_say_words(say_words_path)
-    stop_words = load_stop_words(r"resource/stop_words")
-    return WordModel(w2v_model, say_words, stop_words)
+
+    def __init__(self, word2vec_model, say_words, stop_words, sif_model, rnn_model):
+        self.rnn_model = rnn_model
+        self.sif_model = sif_model
+        self.stop_words = stop_words
+        self.say_words = say_words
+        self.word2vec_model = word2vec_model
+        self.sif_extractor = extractor.SIFExtractor(sif_model, say_words)
+        self.rnn_extractor = extractor.RNNExtractor(rnn_model, say_words)
+        # 默认使用rnn
+        self.extractor = self.rnn_extractor
 
 
 def init_model(app: Flask):
     """
     初始化word2vec模型
     """
-    app.logger.info("load model...")
-    app.config['word2vec_model_path'] = os.getenv('WORD2VEC_MODEL_PATH',
-                                                  os.path.join(app.instance_path, 'model', 'word2vec.model'))
-    app.word_model = load_model(app.config['word2vec_model_path'])
-    app.logger.info("load model success")
+    app.logger.info("start initialize...")
+    instance_path = app.instance_path
+    app.logger.info("app instance path: {}".format(instance_path))
+
+    # 加载word2vec
+    word2vec_model_path = os.path.join(instance_path, 'word2vec.model')
+    app.logger.info("load word2vec model: {}".format(word2vec_model_path))
+    word2vec_model = Word2Vec.load(word2vec_model_path)
+
+    # 获取说的相近词
+    init_say_words_path = os.path.join(instance_path, 'init_say_words.txt')
+    say_words_path = os.path.join(instance_path, 'say_words.txt')
+    app.logger.info("get say words: {}".format(say_words_path))
+    say_words = load_say_words(word2vec_model, say_words_path, init_say_words_path)
+
+    # 加载停用词
+    stop_words_path = os.path.join(instance_path, 'stop_words.txt')
+    app.logger.info("load stop words: {}".format(say_words_path))
+    stop_words = load_stop_words(stop_words_path)
+
+    # 加载sif模型
+    app.logger.info("load sif model: {}".format(say_words_path))
+    sif_model = load_sif_model(word2vec_model, stop_words)
+
+    # 加载rnn模型
+    vocab_path = os.path.join(instance_path, 'vocabulary.txt')
+    rnn_model_path = os.path.join(instance_path, 'rnn_model')
+    app.logger.info("load rnn model: {},{}".format(vocab_path, rnn_model_path))
+    rnn_model = load_rnn_model(vocab_path, rnn_model_path)
+
+    app.nlp_model = NLPModel(word2vec_model, say_words, stop_words, sif_model, rnn_model)
+    app.logger.info("initialize over.")
