@@ -15,7 +15,10 @@ def test_load_vocabulary(source):
     '腾讯从来没有To B的基因。',
     '吴军，原腾讯副总裁。',
     '吴军也是当前Google中日韩文搜索算法的主要设计者。著有《数学之美》、《浪潮之巅》和《文明之光》等畅销书。',
-    '而吴军今天这样一番言论，有人认为说的好，很有道理，有人觉得吴军过于狂妄自大了。你们怎么看呢？'
+    '而吴军今天这样一番言论，有人认为说的好，很有道理，有人觉得吴军过于狂妄自大了。你们怎么看呢？',
+    '有时候发展不行，跟这个CEO（桑达尔˙皮查伊）平庸也有很大的关系。',
+    '就是说它最后一个对人类最大的贡献是安卓。',
+    '百度的二号人物永远是离职的。'
 ])
-def test_model(rnn_net, sentence):
-    print(sentence, rnn_net.predict(sentence))
+def test_model(speck_model, sentence):
+    print(sentence, speck_model.predict(sentence))

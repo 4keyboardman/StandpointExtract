@@ -48,7 +48,7 @@ def get_related_words(initial_words, model):
 
 def gen_say_words(word2vec_model, path, initial_words):
     say_words = get_related_words(initial_words, word2vec_model)
-    with open(path, 'w') as f:
+    with open(path, 'w', encoding="utf-8") as f:
         for w in say_words:
             f.write(w + '\n')
 
@@ -88,16 +88,25 @@ class NLPModel:
     全局模型参数
     """
 
-    def __init__(self, word2vec_model, say_words, stop_words, sif_model, rnn_model):
-        self.rnn_model = rnn_model
+    def __init__(self, word2vec_model, say_words, stop_words, sif_model, speck_model):
+        self.speck_model = speck_model
         self.sif_model = sif_model
         self.stop_words = stop_words
         self.say_words = say_words
         self.word2vec_model = word2vec_model
         self.sif_extractor = extractor.SIFExtractor(sif_model, say_words)
-        self.rnn_extractor = extractor.RNNExtractor(rnn_model, say_words)
+        self.speck_extractor = extractor.SpeckExtractor(speck_model, say_words)
         # 默认使用rnn
-        self.extractor = self.rnn_extractor
+        self.extractor = self.speck_extractor
+
+    def set_model(self, model):
+        if model == 'rnn':
+            self.extractor = self.speck_extractor
+        elif model == 'sif':
+            self.extractor = self.sif_extractor
+        else:
+            return False
+        return True
 
 
 def init_model(app: Flask):
@@ -130,9 +139,9 @@ def init_model(app: Flask):
 
     # 加载rnn模型
     vocab_path = os.path.join(instance_path, 'vocabulary.txt')
-    rnn_model_path = os.path.join(instance_path, 'rnn_model')
-    app.logger.info("load rnn model: {},{}".format(vocab_path, rnn_model_path))
-    rnn_model = load_rnn_model(vocab_path, rnn_model_path)
+    speck_model_path = os.path.join(instance_path, 'speck_model')
+    app.logger.info("load speck model: {},{}".format(vocab_path, speck_model_path))
+    speck_model = load_rnn_model(vocab_path, speck_model_path)
 
-    app.nlp_model = NLPModel(word2vec_model, say_words, stop_words, sif_model, rnn_model)
+    app.nlp_model = NLPModel(word2vec_model, say_words, stop_words, sif_model, speck_model)
     app.logger.info("initialize over.")

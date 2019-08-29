@@ -77,6 +77,6 @@ def say_words(request):
 
 
 @pytest.fixture(scope="session", params=[(r"instance/vocabulary.txt", r"instance/rnn_model")])
-def rnn_net(request):
+def speck_model(request):
     vocab = speck_classifier.load_vocabulary(request.param[0])
     return speck_classifier.load_model(request.param[1], vocab)
