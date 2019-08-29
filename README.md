@@ -1,5 +1,5 @@
 # 新闻人物言论自动提取
-## 线上地址：http://47.105.82.234/
+
 ### 参考资料
 - flask文档：https://dormousehole.readthedocs.io/en/latest/
 - pyhanlp：https://github.com/hankcs/pyhanlp
@@ -122,3 +122,5 @@
 
 1. https://github.com/MosBest/Automatic-speech-extraction
 2. https://github.com/zhengzhihust/news_extraction
+
+## 安装说明 [INSTANLL.md](./INSTALL.md)
