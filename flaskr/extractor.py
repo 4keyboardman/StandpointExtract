@@ -108,14 +108,16 @@ class SIFExtractor(Extractor):
         result = tuple()
         for word in parsed_sentence.iterator():
             root = word.HEAD
-            if word.DEPREL == '主谓关系' and root.DEPREL == '核心关系':
+            if word.DEPREL == '主谓关系':
                 # TODO: if word.LEMMA is 代词， 指代消解
                 speaker_id = word.ID
                 if word.POSTAG.startswith('n') and word.HEAD.LEMMA in related_words:
                     content = search(parsed_sentence, root.ID, speaker_id)
                     result = ['first', word.LEMMA, content]  # word.LEMMA为发表观点的人
-                elif word.POSTAG == 'r':
+                    break
+                elif word.POSTAG == 'r' and root.DEPREL == '核心关系':
                     result = ('next', word.LEMMA, sentence)  # 主语是代词的候选句子
+                    break
                 else:
                     result = ('candidate', word.LEMMA, sentence)
         if len(result) == 0:
@@ -167,7 +169,7 @@ class SpeckExtractor(Extractor):
         parsed_sentence = parse_sentence(sentence)
         for word in parsed_sentence.iterator():
             root = word.HEAD
-            if word.DEPREL == '主谓关系' and root.DEPREL == '核心关系' and \
+            if word.DEPREL == '主谓关系' and \
                     word.POSTAG.startswith('n') and word.HEAD.LEMMA in related_words:
                 # TODO: if word.LEMMA is 代词， 指代消解
                 speaker_id = word.ID
