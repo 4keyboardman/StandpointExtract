@@ -23,6 +23,7 @@ Windows系统运行cmd
 
     $ pip install -e .
 
+pyhanlp需要下载数据包，详情参考：https://github.com/hankcs/pyhanlp/wiki/%E6%89%8B%E5%8A%A8%E9%85%8D%E7%BD%AE
 
 下载模型文件放在项目根目录下：https://pan.baidu.com/s/1hE-p3YTMnxJebzthDNPJbw
 
