@@ -24,7 +24,7 @@ Windows系统运行cmd
     $ pip install -e .
 
 
-下载模型文件https://pan.baidu.com/s/1hE-p3YTMnxJebzthDNPJbw放在项目根目录下
+下载模型文件放在项目根目录下：https://pan.baidu.com/s/1hE-p3YTMnxJebzthDNPJbw
 
 解压文件:
     $ unzip instance.zip
