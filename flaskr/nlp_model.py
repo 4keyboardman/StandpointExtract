@@ -74,13 +74,17 @@ def load_stop_words(path):
     return stop_words
 
 
+def load_word2vec_model(model_path):
+    return Word2Vec.load(model_path)
+
+
 def load_sif_model(word2vec_model, stop_words):
     return SIF_embedding.SIFModel(word2vec_model, stop_words)
 
 
-def load_rnn_model(vocab_path, rnn_model_path):
+def load_speck_model(vocab_path, model_path):
     vocab = speck_classifier.load_vocabulary(vocab_path)
-    return speck_classifier.load_model(rnn_model_path, vocab)
+    return speck_classifier.load_model(model_path, vocab)
 
 
 class NLPModel:
@@ -120,7 +124,7 @@ def init_model(app: Flask):
     # 加载word2vec
     word2vec_model_path = os.path.join(instance_path, 'word2vec.model')
     app.logger.info("load word2vec model: {}".format(word2vec_model_path))
-    word2vec_model = Word2Vec.load(word2vec_model_path)
+    word2vec_model = load_word2vec_model(word2vec_model_path)
 
     # 获取说的相近词
     init_say_words_path = os.path.join(instance_path, 'init_say_words.txt')
@@ -137,11 +141,11 @@ def init_model(app: Flask):
     app.logger.info("load sif model: {}".format(say_words_path))
     sif_model = load_sif_model(word2vec_model, stop_words)
 
-    # 加载rnn模型
+    # 加载speck rnn模型
     vocab_path = os.path.join(instance_path, 'vocabulary.txt')
     speck_model_path = os.path.join(instance_path, 'speck_model')
     app.logger.info("load speck model: {},{}".format(vocab_path, speck_model_path))
-    speck_model = load_rnn_model(vocab_path, speck_model_path)
+    speck_model = load_speck_model(vocab_path, speck_model_path)
 
     app.nlp_model = NLPModel(word2vec_model, say_words, stop_words, sif_model, speck_model)
     app.logger.info("initialize over.")

@@ -9,7 +9,7 @@ with io.open("README.rst", "rt", encoding="utf8") as f:
 setup(
     name="StandpointExtract",
     version="1.0.0",
-    url="http://flask.pocoo.org/docs/tutorial/",
+    url="https://github.com/4keyboardman/StandpointExtract",
     license="BSD",
     maintainer="4keyboardman",
     maintainer_email="fyjun2071@163.com",
@@ -18,6 +18,6 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
-    install_requires=["flask", 'sqlalchemy', 'werkzeug', 'pyhanlp', 'gensim', 'scikit-learn', 'numpy', 'jieba', 'mxnet'],
+    install_requires=["flask", 'pyhanlp', 'gensim', 'scikit-learn', 'numpy', 'jieba', 'mxnet'],
     extras_require={"test": ["pytest", "coverage"]},
 )
