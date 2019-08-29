@@ -42,10 +42,6 @@ def create_app(test_config=None):
     except OSError:
         pass
 
-    @app.route("/hello")
-    def hello():
-        return "Hello, World!"
-
     # 日志输出拦截器
     @app.before_request
     def before_request():
@@ -56,16 +52,9 @@ def create_app(test_config=None):
                         'headers': {k: v for k, v in request.headers.items()}}
         app.logger.info(request_info)
 
-    # register the database commands
-    from flaskr import db
-    # 初始化数据库
-    db.init_app(app)
-
     # apply the blueprints to the app
-    from flaskr import auth, blog, extract_router, cmd_router
+    from flaskr import extract_router, cmd_router
     # 注册蓝图
-    app.register_blueprint(auth.bp)
-    app.register_blueprint(blog.bp)
     app.register_blueprint(extract_router.bp)
     app.register_blueprint(cmd_router.bp)
 

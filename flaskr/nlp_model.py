@@ -99,7 +99,7 @@ class NLPModel:
         # 默认使用rnn
         self.extractor = self.speck_extractor
 
-    def set_model(self, model):
+    def set_extractor(self, model):
         if model == 'rnn':
             self.extractor = self.speck_extractor
         elif model == 'sif':

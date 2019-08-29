@@ -1,4 +1,5 @@
 from flaskr import nlp_model
+from flaskr.extractor import SpeckExtractor
 from flask import Blueprint
 from flask import current_app
 
@@ -11,6 +12,12 @@ def reload():
     return 'success'
 
 
-@bp.route('/model/<any(rnn, sif):model>', methods=["GET"])
-def set_model(model):
-    return 'success' if current_app.nlp_model.set_model(model) else 'error: invalid model'
+@bp.route('/extractor/<any(rnn, sif):model>', methods=["GET"])
+def set_extractor(model):
+    return 'success' if current_app.nlp_model.set_extractor(model) else 'error: invalid model.'
+
+
+@bp.route('/extractor', methods=["GET"])
+def get_extractor():
+    extractor = current_app.nlp_model.extractor
+    return 'rnn' if type(extractor) == SpeckExtractor else 'sif'
