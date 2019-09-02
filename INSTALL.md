@@ -11,7 +11,7 @@
 
 linux系统运行
 
-    $ python3 -m venv flaskr
+    $ python3 -m venv venv
     $ . venv/bin/activate
 
 Windows系统运行cmd
