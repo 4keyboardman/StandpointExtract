@@ -100,14 +100,17 @@ class NLPModel:
         self.word2vec_model = word2vec_model
         self.sif_extractor = extractor.SIFExtractor(sif_model, say_words)
         self.speck_extractor = extractor.SpeckExtractor(speck_model, say_words)
-        # 默认使用rnn
-        self.extractor = self.speck_extractor
+        self.speck_sif_extractor = extractor.SpeckSIFExtractor(speck_model, sif_model, say_words)
+        # 默认设置
+        self.extractor = self.speck_sif_extractor
 
     def set_extractor(self, model):
         if model == 'rnn':
             self.extractor = self.speck_extractor
         elif model == 'sif':
             self.extractor = self.sif_extractor
+        elif model == 'mix':
+            self.extractor = self.speck_sif_extractor
         else:
             return False
         return True
@@ -134,11 +137,11 @@ def init_model(app: Flask):
 
     # 加载停用词
     stop_words_path = os.path.join(instance_path, 'stop_words.txt')
-    app.logger.info("load stop words: {}".format(say_words_path))
+    app.logger.info("load stop words: {}".format(stop_words_path))
     stop_words = load_stop_words(stop_words_path)
 
     # 加载sif模型
-    app.logger.info("load sif model: {}".format(say_words_path))
+    app.logger.info("load sif model")
     sif_model = load_sif_model(word2vec_model, stop_words)
 
     # 加载speck rnn模型

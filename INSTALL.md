@@ -54,4 +54,7 @@ api命令
 ---
     GET /cmd/model/reload: 重新加载instance中的模型文件
     GET /cmd/extractor: 查询当前使用的判断句子结束的模型类型
-    GET /cmd/extractor/{type}: 设置判断句子结束的方法，type类型: sif-句子相似度，rnn-是否是人说的话
+    GET /cmd/extractor/{type}: 设置判断句子结束的方法，type类型: 
+        sif-句子相似度
+        rnn-是否是人说的话
+        mix-两者综合，默认类型

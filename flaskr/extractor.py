@@ -59,6 +59,12 @@ def search_trie(trie, predicate):
 
 
 def build_sentence(node, sentence=''):
+    """
+    还原当前节点的句子
+    :param node:
+    :param sentence:
+    :return:
+    """
     children = node.children.values()
     if len(children) == 0:
         return sentence + node.LEMMA
@@ -85,20 +91,20 @@ def parse_say(node):
         if word.DEPREL == '主谓关系':
             if is_entity(word):
                 entity = word
-                continue
+                break
             else:
                 return None, None
         elif word.DEPREL == '状中结构' and not entity:
             # 状中结构查找实体
             entity = search_trie(word, is_entity)
             if entity:
-                continue
+                break
         else:
             pass
     if not entity:
         return None, None
     # 获取实体说的话
-    exclude_relation = {'主谓关系', '状中结构', '间宾关系', '左附加关系', '右附加关系'}     # 非说话内容关系
+    exclude_relation = {'主谓关系', '状中结构', '间宾关系', '左附加关系', '右附加关系'}  # 非说话内容关系
     sentence = ''
     speck_words = [c for c in children if c.DEPREL not in exclude_relation]
     if len(speck_words) == 1 and speck_words[0].CPOSTAG == 'wp':
@@ -123,7 +129,9 @@ def search_speck(word_trie, say_words):
         children = node.children.values()
         unseen += children
         if node.LEMMA in say_words:
-            return parse_say(node)
+            say_entity, sentence = parse_say(node)
+            if say_entity:
+                return say_entity, sentence
     return None, None
 
 
@@ -154,40 +162,43 @@ class SIFExtractor(Extractor):
     def __init__(self, sif_model: SIFModel, say_words):
         self.sif_model = sif_model
         self.say_words = say_words
+        self.similarity_threshold = 0.5
 
     def extract(self, text):
-        return self._extract(text, self.say_words, self.sif_model)
+        return self._extract(text)
 
-    @staticmethod
-    def _extract(text, say_words, sif_model):
+    def _extract(self, text):
         def flush_cache(r, c):
             if len(r) > 0 and len(c) > 0:
                 r[-1][-1] = ''.join(c)
                 c.clear()
 
-        sen_list = [s for s in cut_sentences(text) if len(s) > 0]
         result = []
         cache = []
-        for s in sen_list:
-            sen_type, entity, sentence = SIFExtractor._search_dependency(s, say_words)
-            if 'first' == sen_type:
+        for s in cut_sentences(text):
+            sen_type, entity, sentence = self._search_dependency(s)
+            if 'first' == sen_type:     # 包含说话实体
                 flush_cache(result, cache)
                 result.append([entity, sentence])
                 cache.append(sentence)
-            elif 'next' == sen_type and len(cache) > 0:
+            elif 'next' == sen_type and len(cache) > 0:     # 依赖与上文的句子
                 cache.append(sentence)
-            elif 'candidate' == sen_type and len(cache) > 0 and sif_model.is_next(sentence, ''.join(cache)):
+            elif 'candidate' == sen_type and len(cache) > 0 and self._predict(sentence, cache):     # 完整的句子，需要判断
                 cache.append(sentence)
             else:
                 flush_cache(result, cache)
         flush_cache(result, cache)
         return [[i[0], post_process_result(i[1])] for i in result]
 
-    @staticmethod
-    def _search_dependency(sentence, related_words):
+    def _search_dependency(self, sentence):
+        """
+        分析句子结构
+        :param sentence:
+        :return:
+        """
         _, trie = parse_sentence(sentence)
         # 寻找说语句
-        entity, s = search_speck(trie, related_words)
+        entity, s = search_speck(trie, self.say_words)
         if entity:
             return 'first', entity, s
         # 没有找到说语句，则分析句子结构
@@ -195,12 +206,15 @@ class SIFExtractor(Extractor):
         for c in children:
             if c.DEPREL == '主谓关系':
                 if c.POSTAG == 'r':
-                    return 'next', c.LEMMA, sentence  # 主语是代词，依赖于前面的句子
+                    return 'next', None, sentence  # 主语是代词，依赖于前面的句子
                 else:
-                    return 'candidate', c.LEMMA, sentence  # 完全独立的句子，待确定
-            else:
-                return 'next', None, sentence  # 句子没有主谓关系，依赖于前面的句子
+                    return 'candidate', None, sentence  # 完全独立的句子，待确定
         return None, None, None
+
+    def _predict(self, sentence, cache):
+        """ 根据句子相似度判断 """
+        similarity = self.sif_model.sentence_similarity(sentence, ''.join(cache))
+        return similarity > self.similarity_threshold
 
 
 class SpeckExtractor(Extractor):
@@ -213,36 +227,61 @@ class SpeckExtractor(Extractor):
         self.speck_model = speck_model
 
     def extract(self, text):
-        return self._extract(text, self.say_words, self.speck_model)
+        return self._extract(text)
 
-    @staticmethod
-    def _extract(text, say_words, speck_model):
+    def _extract(self, text):
         def flush_cache(r, c):
             if len(r) > 0 and len(c) > 0:
                 r[-1][-1] = ''.join(c)
                 c.clear()
 
-        sen_list = [s for s in cut_sentences(text) if len(s) > 0]
         result = []
         cache = []
-        for s in sen_list:
-            entity, sentence = SpeckExtractor._search_dependency(s, say_words)
-            if sentence and speck_model.predict(sentence):
+        for s in cut_sentences(text):
+            entity, sentence = self._search_dependency(s)
+            if sentence and self._predict(sentence, cache):
                 flush_cache(result, cache)
                 result.append([entity, sentence])
                 cache.append(sentence)
-            elif len(cache) > 0 and speck_model.predict(s):
+            elif len(cache) > 0 and self._predict(s, cache):
                 cache.append(s)
             else:
                 flush_cache(result, cache)
         flush_cache(result, cache)
         return [[i[0], post_process_result(i[1])] for i in result]
 
-    @staticmethod
-    def _search_dependency(sentence, related_words):
-        """
-        input: Chinese text parsed by parse_sentence
-        return: (speaker, point)
-        """
+    def _search_dependency(self, sentence):
         _, trie = parse_sentence(sentence)
-        return search_speck(trie, related_words)
+        return search_speck(trie, self.say_words)
+
+    def _predict(self, sentence, cache):
+        """ 根据rnn模型判断 """
+        return self.speck_model.predict(sentence)[0]
+
+
+class SpeckSIFExtractor(SpeckExtractor):
+    """
+    综合句子相似度和rnn模型判断：
+    rnn判断结果为True则直接返回
+    rnn判断结果为False且可信度大于阈值则返回False
+    rnn判断结果为False且可信度小于阈值则根据相似度判断
+    """
+
+    def __init__(self, speck_model: BiRNN, sif_model: SIFModel, say_words):
+        super().__init__(speck_model, say_words)
+        self.sif_model = sif_model
+        self.similarity_threshold = 0.5
+        self.prob_threshold = 1
+
+    def _predict(self, sentence, cache):
+        flag, prob = self.speck_model.predict(sentence)
+        if flag:    # rnn判断结果为True
+            return True
+        else:
+            if prob > self.prob_threshold:      # 可信度大于阈值
+                return False
+        if len(cache) == 0:
+            return False
+        # 根据相似度判断
+        similarity = self.sif_model.sentence_similarity(sentence, ''.join(cache))
+        return similarity > self.similarity_threshold

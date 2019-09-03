@@ -12,7 +12,7 @@ def reload():
     return 'success'
 
 
-@bp.route('/extractor/<any(rnn, sif):model>', methods=["GET"])
+@bp.route('/extractor/<any(rnn, sif, mix):model>', methods=["GET"])
 def set_extractor(model):
     return 'success' if current_app.nlp_model.set_extractor(model) else 'error: invalid model.'
 

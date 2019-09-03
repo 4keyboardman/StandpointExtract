@@ -37,8 +37,9 @@ class BiRNN(nn.Block):
 
     def predict(self, sentence):
         sentence = nd.array(self.vocab.to_indices(cut(sentence)))
-        label = nd.argmax(self(sentence.reshape((1, -1))), axis=1)
-        return True if label.asscalar() == 1 else False
+        prob = self(sentence.reshape((1, -1)))
+        label = nd.argmax(prob, axis=1)
+        return True if label.asscalar() == 1 else False, max(0, (prob[0, 0] - prob[0, 1]).asscalar())
 
 
 def load_vocabulary(source, encoding='utf-8'):
