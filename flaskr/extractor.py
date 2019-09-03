@@ -1,5 +1,3 @@
-from functools import lru_cache
-
 from flaskr.utils import *
 from pyhanlp import *
 from flaskr.SIF_embedding import SIFModel
@@ -86,30 +84,30 @@ def parse_say(node):
     for word in children:
         if word.DEPREL == '主谓关系':
             if is_entity(word):
-                entity = word.LEMMA
+                entity = word
                 continue
             else:
                 return None, None
         elif word.DEPREL == '状中结构' and not entity:
             # 状中结构查找实体
-            entity_node = search_trie(word, is_entity)
-            if entity_node:
-                entity = entity_node.LEMMA
+            entity = search_trie(word, is_entity)
+            if entity:
                 continue
         else:
             pass
-    # 使用并列的词继续查找
-    if not entity and node.DEPREL == '并列关系':
-        entity, _ = parse_say(node.parent)
     if not entity:
         return None, None
     # 获取实体说的话
-    exclude_relation = {'主谓关系', '状中结构', '间宾关系'}     # 非说话内容关系
+    exclude_relation = {'主谓关系', '状中结构', '间宾关系', '左附加关系', '右附加关系'}     # 非说话内容关系
     sentence = ''
     speck_words = [c for c in children if c.DEPREL not in exclude_relation]
+    if len(speck_words) == 1 and speck_words[0].CPOSTAG == 'wp':
+        return None, None
     for w in speck_words:
         sentence += build_sentence(w)
-    return entity, sentence
+    # 加上实体的修饰词
+    say_entity = build_sentence(entity)
+    return say_entity, sentence
 
 
 def search_speck(word_trie, say_words):
@@ -127,39 +125,6 @@ def search_speck(word_trie, say_words):
         if node.LEMMA in say_words:
             return parse_say(node)
     return None, None
-
-
-def search(parsed_sentence, root_id, speaker_id):
-    """
-    :root_id: id for "说"
-    :speaker_id: speaker name word id
-    :target_id: target word id, search whether it belong to "说"
-    search the entire sentence, all tokens that belong to root and not belong to speaker is the result
-    """
-    result = ''
-    for word in parsed_sentence.iterator():
-        if check_word(parsed_sentence, root_id, speaker_id, word):
-            result += word.LEMMA
-    return result
-
-
-@lru_cache(maxsize=32)
-def check_word(parsed_sentence, root_id, speaker_id, word):
-    """
-    :root_id: id for "说"
-    :speaker_id: id for speaker
-    :word: check if word belong to root and not belong to speaker
-    """
-    # 状中结构：去除修饰说的成分; 主谓关系：去除说的主语
-    except_relation = ['状中结构', '主谓关系', '间宾关系']
-    # 标点直接返回
-    if word.DEPREL == '标点符号':
-        return True
-    if word.ID in [speaker_id, 0]:
-        return False
-    if word.HEAD.ID == root_id and word.DEPREL not in except_relation:
-        return True  # 找到
-    return check_word(parsed_sentence, root_id, speaker_id, word.HEAD)
 
 
 def post_process_result(text):
