@@ -50,6 +50,7 @@ Windows系统运行cmd:
 打开浏览器访问 http://127.0.0.1:5000
 
 使用gunicorn启动：
+
     $ gunicorn -D -w 1 -b 0.0.0.0:8871 "flaskr:create_app()"
 
 api命令
