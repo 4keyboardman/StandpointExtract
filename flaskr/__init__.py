@@ -53,10 +53,11 @@ def create_app(test_config=None):
         app.logger.info(request_info)
 
     # apply the blueprints to the app
-    from flaskr import extract_router, cmd_router
+    from flaskr import extract_router, cmd_router, auto_summarizer_router
     # 注册蓝图
     app.register_blueprint(extract_router.bp)
     app.register_blueprint(cmd_router.bp)
+    app.register_blueprint(auto_summarizer_router.bp)
 
     # make url_for('index') == url_for('blog.index')
     # in another app, you might define a separate main index here with
