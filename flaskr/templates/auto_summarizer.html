@@ -32,10 +32,10 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
-                <li class="nav-item active">
+                <li class="nav-item">
                     <a class="nav-link" href="/">言论提取</a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item active">
                     <a class="nav-link" href="/auto_summarizer">自动摘要</a>
                 </li>
             </ul>
@@ -147,7 +147,7 @@
         input_test.val(txt);
         var submit = $('#submit');
         submit.click(function () {
-            $.post($SCRIPT_ROOT + '/extract', {
+            $.post($SCRIPT_ROOT + '/auto_summarizer', {
                 text: input_test.val()
             }, function (data) {
                 $('#submit').html('&nbsp;提交&nbsp;');

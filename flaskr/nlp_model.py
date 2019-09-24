@@ -103,6 +103,7 @@ class NLPModel:
         self.speck_sif_extractor = extractor.SpeckSIFExtractor(speck_model, sif_model, say_words)
         # 默认设置
         self.extractor = self.speck_sif_extractor
+        self.auto_summarizer = {'rank': 'text_rank'}
 
     def set_extractor(self, model):
         if model == 'rnn':

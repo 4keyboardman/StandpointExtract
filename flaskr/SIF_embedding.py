@@ -196,7 +196,7 @@ class SIFModel:
         w = seq2weight(x, m, self.weight4ind)
         p = params()
         p.rmpc = 0 if len(sentences) <= 1 else 1
-        return SIF_embedding(self.word_vectors, x, w, p)
+        return SIF_embedding(self.word_vectors, x, w, p)[0]
 
     def is_next(self, s1, s2, threshold=0.5):
         return self.sentence_similarity(s1, s2) >= threshold

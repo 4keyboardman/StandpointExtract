@@ -8,6 +8,7 @@ def cut_sentences(para):
     :param para:
     :return:
     """
+    para = ''.join([p.strip() for p in para.split("\n")])   # 合并换行
     para = re.sub(r'([。！？\?])([^”’])', r"\1\n\2", para)  # 单字符断句符
     para = re.sub(r'(\.{6})([^”’])', r"\1\n\2", para)  # 英文省略号r
     para = re.sub(r'(\…{2})([^”’])', r"\1\n\2", para)  # 中文省略号

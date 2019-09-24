@@ -1,11 +1,1 @@
-def f():
-    return None, None
-
-
-print(f())
-if f():
-    print('aaa')
-else:
-    print('bbb')
-a = f()
-print(*a)
+print(sorted([2, 5, 3, 7, 6, 2]))
