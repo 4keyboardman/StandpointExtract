@@ -18,6 +18,6 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
-    install_requires=["flask", 'pyhanlp', 'gensim', 'scikit-learn', 'numpy', 'jieba', 'mxnet'],
+    install_requires=["flask", 'pyhanlp', 'gensim', 'scikit-learn', 'numpy', 'jieba', 'mxnet', 'networkx'],
     extras_require={"test": ["pytest", "coverage"]},
 )

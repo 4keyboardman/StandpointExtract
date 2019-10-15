@@ -162,13 +162,13 @@ class SIFModel:
 
     def sentence_similarity(self, s1, s2):
         if type(s1) == list:
-            s1_embdding = self.sentence2vec(s1)[0]
+            s1_embdding = self.sentence2vec(s1)
         else:
-            s1_embdding = self.sentence2vec([s1])[0]
+            s1_embdding = self.sentence2vec([s1])
         if type(s2) == list:
-            s2_embdding = self.sentence2vec(s2)[0]
+            s2_embdding = self.sentence2vec(s2)
         else:
-            s2_embdding = self.sentence2vec([s2])[0]
+            s2_embdding = self.sentence2vec([s2])
         return self.similarity(s1_embdding, s2_embdding)
 
     @staticmethod
@@ -182,6 +182,8 @@ class SIFModel:
         inn = (emb1 * emb2).sum()
         emb1norm = np.sqrt((emb1 * emb1).sum())
         emb2norm = np.sqrt((emb2 * emb2).sum())
+        if emb1norm == 0 or emb2norm == 0:
+            return 0
         scores = inn / emb1norm / emb2norm
         return scores
 
@@ -192,6 +194,9 @@ class SIFModel:
         :return:
         """
         sens = [cut(s, self.stop_words) for s in sentences]
+        sens = [i for i in sens if len(i) > 0]
+        if len(sens) == 0:
+            return np.zeros(self.word_vectors.shape[1])
         x, m = sentences2idx(sens, self.word_index_map)
         w = seq2weight(x, m, self.weight4ind)
         p = params()

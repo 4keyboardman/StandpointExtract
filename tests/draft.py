@@ -1,1 +1,3 @@
-print(sorted([2, 5, 3, 7, 6, 2]))
+import numpy as np
+
+print(np.zeros(100))

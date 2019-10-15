@@ -2,19 +2,50 @@ from flaskr.utils import *
 from jieba.analyse import textrank
 import jieba
 import numpy as np
+import networkx as nx
 from flask import current_app
 
 
-def text_rank(sentences, **kwargs):
-    vacab = dict(textrank(''.join(sentences), topK=None, withWeight=True, **kwargs))
+def text_rank(sentences):
+    """
+    通过词语的text_rank值给句子评分
+    1.计算所有词的text_rank值
+    2.计算每个句子包含词语的text_rank平均值
+    """
+    vacab = dict(textrank(''.join(sentences), topK=None, withWeight=True))
     sen_score = {}
     for i, s in enumerate(sentences):
-        score = np.mean([vacab[word] for word in jieba.cut(s) if word in vacab])
+        arr = [vacab[word] for word in jieba.cut(s) if word in vacab]
+        score = np.mean(arr) if len(arr) > 0 else 0
         sen_score[i] = score
     return sen_score
 
 
-def sentence_similarity(sentences, **kwargs):
+def sentence_rank(sentences):
+    """
+    经典extractive自动摘要方法
+    1.把文章切分成句子
+    2.把每个句子转换成向量，并通过consine_similarity计算两个句子之间的相似度
+    3.利用相似矩阵构建图（graph）
+    4.计算图的每一个结点的page rank
+    """
+    similarity = current_app.nlp_model.sif_model.sentence_similarity
+    # 构建相似度矩阵
+    similarity_matrix = np.zeros((len(sentences), len(sentences)))
+    for i in range(len(sentences)):
+        for j in range(len(sentences)):
+            if i != j:
+                similarity_matrix[i][j] = similarity(sentences[i], sentences[j])
+    # 利用相似矩阵构建图（graph）
+    sentence_similarity_graph = nx.from_numpy_array(similarity_matrix)
+    # 计算图的每一个结点的page rank
+    return nx.pagerank(sentence_similarity_graph)
+
+
+def sentence_similarity(sentences):
+    """
+    将文本当作一个长句，计算每个句子与长句的相似度，给句子评分
+    """
     sif_model = current_app.nlp_model.sif_model
     doc2vec = sif_model.sentence2vec([''.join(sentences)])
     sen_score = {}
@@ -24,17 +55,66 @@ def sentence_similarity(sentences, **kwargs):
     return sen_score
 
 
-def summarize(text, n=None, ratio=0.2, rank='text_rank', **kwargs):
-    sentences = cut_sentences(text)
-    score = eval(rank)(sentences, **kwargs)
-    sorted_score = sorted(score.items(), key=lambda i: i[1], reverse=True)
-    if not n:
-        n = int(len(text) * ratio)
+def softmax(x):
+    _x = x - np.max(x)
+    ep = np.exp(_x)
+    return ep / np.sum(ep)
+
+
+def simple_cand_idx(sentences, score, n):
+    """ 根据评分简单选取句子 """
     m = 0
-    cand_idx = []
-    for item in sorted_score:
-        cand_idx.append(item[0])
+    idx = []
+    score = sorted(score, key=lambda i: i[1], reverse=True)
+    for item in score:
+        idx.append(item[0])
         m += len(sentences[item[0]])
         if m >= n:
             break
-    return ''.join([sentences[i] for i in sorted(cand_idx)])
+    return idx
+
+
+def position_prob(length):
+    """ 假设前20%文本包含80%内容 """
+    a = np.zeros(length)
+    n = max(1, int(length * 0.2))
+    a[:n] = 1
+    return softmax(a)
+
+
+def cand_idx(sentences, score, n):
+    """ 选取候选句子索引 """
+    m = 0
+    idx = []
+    sif_model = current_app.nlp_model.sif_model
+    score = list(score.items())
+    while m <= n and len(score) > 0:
+        # 对分数softmax
+        prob = softmax([i[1] for i in score])
+        prob = prob * position_prob(len(score))
+        for i, v in enumerate(score):
+            score[i] = (v[0], prob[i])
+        score = sorted(score, key=lambda i: i[1], reverse=True)
+        # 选取分值最高的句子
+        selected = score.pop(0)
+        idx.append(selected[0])
+        m += len(sentences[selected[0]])
+        # 根据句子相似度更新句子分数，减少选取句子之间的冗余度
+        tmp = []
+        for i in score:
+            if i[1] <= 0:
+                continue
+            sim = sif_model.sentence_similarity(sentences[selected[0]], sentences[i[0]])
+            s = i[1] - selected[1] * sim
+            tmp.append((i[0], s))
+        score = tmp
+    return idx
+
+
+def summarize(text, n=None, ratio=0.2, rank='sentence_rank'):
+    sentences = cut_sentences(text)
+    score = eval(rank)(sentences)
+    if not n:
+        n = int(len(text) * ratio)
+    idx = cand_idx(sentences, score, n)
+    return ''.join([sentences[i] for i in sorted(idx)])

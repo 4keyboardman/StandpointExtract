@@ -21,14 +21,3 @@ def set_extractor(model):
 def get_extractor():
     extractor = current_app.nlp_model.extractor
     return 'rnn' if type(extractor) == SpeckExtractor else 'sif'
-
-
-@bp.route('/auto_summarizer/rank', methods=["GET"])
-def get_rank():
-    return current_app.nlp_model.auto_summarizer['rank']
-
-
-@bp.route('/auto_summarizer/rank/<any(text_rank, sentence_similarity):rank>', methods=["GET"])
-def set_rank(rank):
-    current_app.nlp_model.auto_summarizer['rank'] = rank
-    return 'success'
