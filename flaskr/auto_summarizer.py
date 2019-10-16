@@ -82,18 +82,28 @@ def position_prob(length):
     return softmax(a)
 
 
+def apply_postion_prob(score, prob):
+    """ 应用句子位置因素 """
+    for i, v in enumerate(score):
+        score[i] = (v[0], prob[i] * v[1])
+
+
+def apply_softmax(score):
+    prob = softmax([i[1] for i in score])
+    for i, v in enumerate(score):
+        score[i] = (v[0], prob[i])
+
+
 def cand_idx(sentences, score, n):
     """ 选取候选句子索引 """
     m = 0
     idx = []
     sif_model = current_app.nlp_model.sif_model
     score = list(score.items())
+    prob = position_prob(len(score))
     while m <= n and len(score) > 0:
-        # 对分数softmax
-        prob = softmax([i[1] for i in score])
-        prob = prob * position_prob(len(score))
-        for i, v in enumerate(score):
-            score[i] = (v[0], prob[i])
+        apply_softmax(score)
+        apply_postion_prob(score, prob)
         score = sorted(score, key=lambda i: i[1], reverse=True)
         # 选取分值最高的句子
         selected = score.pop(0)
