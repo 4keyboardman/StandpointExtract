@@ -21,6 +21,8 @@
             rnn: 是否是人说的话
             mix: 两者综合，默认类型
 
+详见：[project1.md](./project1.md)
+
 ## 项目二： 文本摘要-无监督抽取式
 程序入口：auto_summarizer_router.py
 
