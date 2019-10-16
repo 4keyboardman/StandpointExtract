@@ -1,126 +1,57 @@
-# 新闻人物言论自动提取
+# 自然语言处理项目
 
-### 参考资料
-- flask文档：https://dormousehole.readthedocs.io/en/latest/
-- pyhanlp：https://github.com/hankcs/pyhanlp
-- hanlp在线演示：http://hanlp.com/
-- 普林斯顿句子向量论文：https://openreview.net/forum?id=SyK00v5xx
-- 论文代码：https://github.com/PrincetonML/SIF
-- 论文解读：https://blog.csdn.net/sinat_31188625/article/details/72677088#commentsedit
-- 解读代码：https://github.com/jx00109/sentence2vec/blob/master/s2v-python3.py
-- 云浮科技句法分析：https://www.yunfutech.com/demo?tab=1
-## 基础目标
-- 输入: 一段新闻文本(Text)
-- 输出: 文中每个人物/实体的观点(List)
-## 挑战目标
-基于实体观点，构建实体观点图谱并可视化
+#### 安装说明： [INSTANLL.md](./INSTALL.md)
 
+## 项目一： 新闻人物言论自动提取
+程序入口：extract_router.py
 
-# 1. 数据层
+处理方法：
+1. 使用wiki中文和搜狗新闻语料库训练词向量
+2. 使用pagerank算法找出与说相近的词
+3. 使用实体分析和句子依存分析找到言论的第一句话
+4. 确定言论结束综合了句子相似度和判断一句话是否可以作为人说的话两种方式。
+- 句子相似度使用了普林斯顿句子向量论文(https://openreview.net/forum?id=SyK00v5xx)的方法
+- 判断一句话是否可以作为人说的话使用一些规则自己构建数据集训练biRNN模型，来预测
 
-能够使用数据库操作，对数据库中的信息进行访问
+确定言论结束方式切换：
 
-## 1. 获取数据
+        GET /cmd/extractor: 查询当前使用的判断句子结束的模型类型
+        GET /cmd/extractor/{type}: 设置判断句子结束的方法，type类型: 
+            sif: 句子相似度
+            rnn: 是否是人说的话
+            mix: 两者综合，默认类型
 
-本项目使用两个数据源，一个是wiki语料库，一个是新闻语料库。
+## 项目二： 文本摘要-无监督抽取式
+程序入口：auto_summarizer_router.py
 
-- wiki语料库已经在作业四中使用过了
+处理方法：
+1. 为文本每个句子评分，
+2. 基于假设文本前20%的内容包含80%信息调整句子评分
+3. 根据分数排序，取分值最高的一句最为候选句
+4. 为了减少文摘句之间的冗余度，需要根据候选句与其他句子的相似度调整剩余句子评分。剩余句子评分-相似度*候选句评分
+5. 重复2-4步，直至摘要足够长
 
-- 新闻语料库
+句子评分实现了3种方法：
+- 经典自动摘要方法
 
-  - 可以从sql中提取
-  - 可以从百度网盘自己下载，后期应该会有人发网盘链接
+        1.把文章切分成句子
+        2.把每个句子转换成向量，并计算两个句子的余弦相似度
+        3.利用相似矩阵构建图（graph）
+        4.计算图的每一个结点的page rank
+       
+- 通过词语的text_rank值给句子评分
 
-  
+        1.计算所有词的text_rank值
+        2.计算每个句子包含词语的text_rank平均值
 
-  **从SQL中获取需要用到以下内容**
+- 将文本当作一个长句，计算每个句子与长句的相似度，给句子评分
 
-1. 数据库为云数据库，配置为 Mysql; 请⼤家下载 DataGrip 或者 MySQL WorkBench 进⾏数据库的访问;
+句子评分及摘要长度参数设置：
 
-2. 用户名：
-
-3. 用户密码：
-
-4. 数据库名：
-
-5. 如果在 DataGrip 下配置，则配置的界⾯见项目一指导
-
-
-# 2. 模型层
-
-构建自然语言处理模型，能够提取出文章中客户的言论
-## 2.1 获得所有表示“说”的意思的单词
-
-### 2.1.1 使用维基百科+新闻语料库制作词向量
-
- - 数据读取
-
- - 繁转简
-
- - 切词
-
- - 模型训练
-
- - 性能测试 
-     - 比较单词的相似度
-     - 寻找近义词
-     - 单词运算
-     - 根据前n个词来类比
-
-
-### 2.1.2 生成与"说"相近的词语
-1. 在基于**第⼀课，第⼆课讲过的搜索树** + **第四课的动态规划**，结合**第五课**所讲的内容，
-
- - 第一课：
- - 第二课：广度优先遍历，深度优先遍历
- - 第四课：动态规划------**递归的暴力解法 -> 带备忘录的递归解法 -> 非递归的动态规划解法**
- - 第五课: 
-   -  NER
-   - Dependency Parsing
-   - TF-IDF
-3. 获得所有与“说”意思接近的单词：`result = pd.Series(model.most_similar(u'保利')) `
-4. 思考：词向量结合图搜索的时候，每个找到的单词如何赋其权重，这个和⼴度优先，A*搜索有何异同？
-
-## 3. 使用 NER，Dependency Parsing等对句子形式进行解析
-
-### 3.1 安装工具
-
-使⽤ NER，Dependency Parsing 等方式，获得是谁说了话，说了什么话。其中 Dependency Parsing 我们有Stanford 的 CoreNLP 和哈⼯⼤的LTP，这两个⼯具的安装过程会比较麻烦，大家要做好心理准备。
-
-建议使用哈工大的： LTP: https://github.com/HIT-SCIR/pyltp
-
-### 3.2  句子形式进行解析
-
-1. 判断该句子的中心词 是否为 ”说“的相近词
-
-2. 寻找中心词对应的命名实体
-
-3. 提取 判别标志，如 ， 。 ！ …等作为分句的标志
-
-
-## 4. 确定言论的结束
-
-### 4.1 目标
-
-1. 在确定了谁说的，说了什么之后，我们要做的就是确定这个话语的结束。要确定这个话语如何结束，这里给大家推荐一个简单性 和高效性两者比较平衡的方法，其原理就是使用单词的词向量加权 + PCA 降维 这个方法是 普林斯顿大学2017 年提出来的一个方法，很简单，但是效果也不错。
-   - 普林斯顿句⼦向量原始论⽂ Paper:https://openreview.net/pdf?id=SyK00v5xx
-   - Scikit-learning TF-IDF句子向量化: https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.TfidfVectorizer.html
-
-
-### 4.2 方法
-1. 使用词向量加权 / PCA 降维的方式 计算 句子向量
-2. 计算 第二个及之后的 句子向量 与 第一个句子向量的 **余弦值**
-3.  判断句子之间的相似度 ，低于某个阈值则判定为结束
-
-# 3.视图层
-
-使用 HTML，Python Web 服务进行网页展示
-
-
-
-# 4.参考
-
-1. https://github.com/MosBest/Automatic-speech-extraction
-2. https://github.com/zhengzhihust/news_extraction
-
-## 安装说明 [INSTANLL.md](./INSTALL.md)
+        GET /auto_summarizer?rank={rank}&ratio={ratio}
+            rank: 评分方法
+                sentence_rank：方法一
+                text_rank：方法二
+                sentence_similarity：方法三
+            ratio: 摘要长度与文本长度比例，默认0.2
+    

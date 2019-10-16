@@ -65,10 +65,4 @@ api命令
         rnn: 是否是人说的话
         mix: 两者综合，默认类型
         
-自动摘要(extractive)：
-
-    GET /cmd/auto_summarizer/rank: 查询当前句子评分算法
-    GET /cmd/auto_summarizer/rank/{type}: 设置句子评分算法，type类型: 
-        text_rank: text_rank算法评分
-        sentence_similarity: 句子相似度评分
         
