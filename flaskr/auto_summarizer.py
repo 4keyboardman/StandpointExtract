@@ -85,13 +85,27 @@ def position_prob(length):
 def apply_postion_prob(score, prob):
     """ 应用句子位置因素 """
     for i, v in enumerate(score):
-        score[i] = (v[0], prob[i] * v[1])
+        score[i] = (v[0], prob[v[0]] + v[1])
 
 
 def apply_softmax(score):
     prob = softmax([i[1] for i in score])
     for i, v in enumerate(score):
         score[i] = (v[0], prob[i])
+
+
+def apply_rules(sentence):
+    rules = current_app.nlp_model.text_summarization_rules
+    for rule in rules:
+        condition = rule[0]
+        replacements = rule[1]
+        if re.search(condition, sentence):
+            for r in replacements:
+                if len(r) == 0:
+                    r = r'.*'
+                sentence = re.sub(r, '', sentence)
+            return sentence
+    return sentence
 
 
 def cand_idx(sentences, score, n):
@@ -101,23 +115,25 @@ def cand_idx(sentences, score, n):
     sif_model = current_app.nlp_model.sif_model
     score = list(score.items())
     prob = position_prob(len(score))
+    apply_softmax(score)
+    apply_postion_prob(score, prob)
     while m <= n and len(score) > 0:
-        apply_softmax(score)
-        apply_postion_prob(score, prob)
         score = sorted(score, key=lambda i: i[1], reverse=True)
         # 选取分值最高的句子
         selected = score.pop(0)
         idx.append(selected[0])
+        selected_sentence = sentences[selected[0]]
+        selected_sentence = apply_rules(selected_sentence)
+        if len(selected_sentence) == 0:
+            continue
+        sentences[selected[0]] = selected_sentence
         m += len(sentences[selected[0]])
         # 根据句子相似度更新句子分数，减少选取句子之间的冗余度
-        tmp = []
-        for i in score:
-            if i[1] <= 0:
-                continue
-            sim = sif_model.sentence_similarity(sentences[selected[0]], sentences[i[0]])
-            s = i[1] - selected[1] * sim
-            tmp.append((i[0], s))
-        score = tmp
+        for i, v in enumerate(score):
+            sim = sif_model.sentence_similarity(sentences[selected[0]], sentences[v[0]])
+            s = v[1] - selected[1] * sim
+            score[i] = (v[0], s)
+        apply_softmax(score)
     return idx
 
 

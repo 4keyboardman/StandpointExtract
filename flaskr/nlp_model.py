@@ -7,6 +7,8 @@ from flaskr import extractor
 from flask import Flask
 from gensim.models import Word2Vec
 
+ENCODING = 'utf-8'
+
 
 def get_related_words(initial_words, model):
     """
@@ -48,14 +50,14 @@ def get_related_words(initial_words, model):
 
 def gen_say_words(word2vec_model, path, initial_words):
     say_words = get_related_words(initial_words, word2vec_model)
-    with open(path, 'w', encoding="utf-8") as f:
+    with open(path, 'w', encoding=ENCODING) as f:
         for w in say_words:
             f.write(w + '\n')
 
 
 def load_say_words(w2v_model, say_words_path, init_say_words_path):
     def read(path):
-        with open(path, encoding="utf-8") as f:
+        with open(path, encoding=ENCODING) as f:
             data = [line.strip() for line in f]
         return data
 
@@ -68,7 +70,7 @@ def load_stop_words(path):
     stop_words = set()
     if not os.path.isfile(path):
         return stop_words
-    with open(path, encoding="utf-8") as f:
+    with open(path, encoding=ENCODING) as f:
         for line in f:
             stop_words.add(line.strip())
     return stop_words
@@ -87,12 +89,23 @@ def load_speck_model(vocab_path, model_path):
     return speck_classifier.load_model(model_path, vocab)
 
 
+def load_text_summarization_rules(rules_path):
+    res = []
+    with open(rules_path, encoding=ENCODING) as f:
+        for line in f:
+            splits = line.split('->')
+            condition = splits[0].strip()
+            replacements = splits[1].strip().split('    ')
+            res.append((condition, replacements))
+    return res
+
+
 class NLPModel:
     """
     全局模型参数
     """
 
-    def __init__(self, word2vec_model, say_words, stop_words, sif_model, speck_model):
+    def __init__(self, word2vec_model, say_words, stop_words, sif_model, speck_model, text_summarization_rules):
         self.speck_model = speck_model
         self.sif_model = sif_model
         self.stop_words = stop_words
@@ -101,6 +114,7 @@ class NLPModel:
         self.sif_extractor = extractor.SIFExtractor(sif_model, say_words)
         self.speck_extractor = extractor.SpeckExtractor(speck_model, say_words)
         self.speck_sif_extractor = extractor.SpeckSIFExtractor(speck_model, sif_model, say_words)
+        self.text_summarization_rules = text_summarization_rules
         # 默认设置
         self.extractor = self.speck_sif_extractor
         self.auto_summarizer = {'rank': 'text_rank'}
@@ -151,5 +165,10 @@ def init_model(app: Flask):
     app.logger.info("load speck model: {},{}".format(vocab_path, speck_model_path))
     speck_model = load_speck_model(vocab_path, speck_model_path)
 
-    app.nlp_model = NLPModel(word2vec_model, say_words, stop_words, sif_model, speck_model)
+    # 加载文本摘要规则
+    text_summarization_rules_path = os.path.join(instance_path, 'text_summarization_rules.txt')
+    app.logger.info("load text summarization rules: {}".format(text_summarization_rules_path))
+    text_summarization_rules = load_text_summarization_rules(text_summarization_rules_path)
+
+    app.nlp_model = NLPModel(word2vec_model, say_words, stop_words, sif_model, speck_model, text_summarization_rules)
     app.logger.info("initialize over.")
