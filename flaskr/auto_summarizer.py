@@ -1,4 +1,5 @@
 from flaskr.utils import *
+from flaskr.extractor import parse_sentence
 from jieba.analyse import textrank
 import jieba
 import numpy as np
@@ -12,11 +13,14 @@ def text_rank(sentences):
     1.计算所有词的text_rank值
     2.计算每个句子包含词语的text_rank平均值
     """
-    vacab = dict(textrank(''.join(sentences), topK=None, withWeight=True))
+    vacab = list(textrank(''.join(sentences), topK=None, withWeight=True,
+                          allowPOS=('nr', 'ns', 'nt', 'nw', 'nz', 'n', 'vn', 'vd', 'v', 'eng')))
+    index_end = int(len(vacab) * 0.2)
+    vacab = {i[0]: i[1] for i in vacab[:index_end]}
     sen_score = {}
     for i, s in enumerate(sentences):
         arr = [vacab[word] for word in jieba.cut(s) if word in vacab]
-        score = np.mean(arr) if len(arr) > 0 else 0
+        score = np.sum(arr) if len(arr) > 0 else 0
         sen_score[i] = score
     return sen_score
 
@@ -108,6 +112,89 @@ def apply_rules(sentence):
     return sentence
 
 
+def apply_reference_resolution(sentence, above_sentence):
+    """
+    简单基于规则的指代消解
+    他，她，它，省略主语
+    :param sentence: 待分析句子
+    :param above_sentence: 上文
+    :return:
+    """
+    res = []
+    subject = ''  # 主语
+    parsed_sentence, _ = parse_sentence(sentence)
+    # 扫描当前句子
+    index = 0
+    nh_entity = None  # 人
+    n_entity = None  # 其他名词
+    nh_pronoun = []  # 他她代词索引
+    n_pronoun = []  # 它代词索引
+    for word in parsed_sentence.iterator():
+        w = word.LEMMA
+        res.append(w)
+        # 检查主语
+        if word.DEPREL == '主谓关系':
+            subject = w
+        # 检查实体
+        if word.POSTAG.startswith('n'):
+            if word.CPOSTAG == 'nh':
+                nh_entity = w
+            else:
+                n_entity = w
+        # 检查代词
+        if word.POSTAG == 'r':
+            if w == '他' or w == '她':
+                if not nh_entity:
+                    nh_pronoun.append(index)
+            elif w == '它':
+                if not n_entity:
+                    n_pronoun.append(index)
+        index += 1
+    # 没有主语则取上文最近句子的主语
+    if len(subject) == 0:
+        for i in reversed(above_sentence):
+            subject = parse_subject(i)
+            if len(subject) > 0:
+                res.insert(0, subject)
+                break
+    # 他她它
+    if len(nh_pronoun) > 0 or len(n_pronoun) > 0:
+        for i in reversed(above_sentence):
+            nh_entity, n_entity = parse_entity(i)
+            if len(nh_pronoun) > 0 and len(nh_entity):
+                for j in nh_pronoun:
+                    res[j] = nh_entity[-1]
+                nh_pronoun.clear()
+            if len(n_pronoun) > 0 and len(n_entity):
+                for j in n_pronoun:
+                    res[j] = n_entity[-1]
+                n_pronoun.clear()
+            if len(nh_pronoun) == 0 and len(n_pronoun) == 0:
+                break
+    return ''.join(res)
+
+
+def parse_subject(sentence):
+    parsed_sentence, _ = parse_sentence(sentence)
+    for word in parsed_sentence.iterator():
+        if word.DEPREL == '主谓关系':
+            return word.LEMMA
+    return ''
+
+
+def parse_entity(sentence):
+    nh_entity = []
+    n_entity = []
+    parsed_sentence, _ = parse_sentence(sentence)
+    for word in parsed_sentence.iterator():
+        if word.POSTAG.startswith('n'):
+            if word.CPOSTAG == 'nh':
+                nh_entity.append(word.LEMMA)
+            else:
+                n_entity.append(word.LEMMA)
+    return nh_entity, n_entity
+
+
 def cand_idx(sentences, score, n):
     """ 选取候选句子索引 """
     m = 0
@@ -126,14 +213,16 @@ def cand_idx(sentences, score, n):
         selected_sentence = apply_rules(selected_sentence)
         if len(selected_sentence) == 0:
             continue
+        selected_sentence = apply_reference_resolution(selected_sentence, sentences[:selected[0]])
         sentences[selected[0]] = selected_sentence
         m += len(sentences[selected[0]])
+        # 考虑冗余度，实际结果后面的句子有点偏题
         # 根据句子相似度更新句子分数，减少选取句子之间的冗余度
-        for i, v in enumerate(score):
-            sim = sif_model.sentence_similarity(sentences[selected[0]], sentences[v[0]])
-            s = v[1] - selected[1] * sim
-            score[i] = (v[0], s)
-        apply_softmax(score)
+        # for i, v in enumerate(score):
+        #     sim = sif_model.sentence_similarity(sentences[selected[0]], sentences[v[0]])
+        #     s = v[1] - selected[1] * sim
+        #     score[i] = (v[0], s)
+        # apply_softmax(score)
     return idx
 
 

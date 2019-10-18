@@ -4,7 +4,11 @@ from flaskr.extractor import *
 
 
 @pytest.mark.parametrize("sentence", [
-    '近日，腾讯原副总裁吴军接受《头条有约》采访时表示，腾讯从来没有To B的基因。',
+    '发现他整个企业做这种服务是完全跟不上的，没有这个基因，你不用想，就像恐龙想去冰河时代生活。',
+    '我今天买了台iphone，这是我一个月的工资',
+    '打电话回去查询，欧洲那边的答复是他们车都没有在发动机上印号码',
+    '我刚把这个苹果咬了一口，你就把它抢走了',
+    '林肯公园在今年五月发行了新专辑《多一丝曙光One More Light》，成为他们第五张登顶Billboard排行榜的专辑。'
 ])
 def test_parse_sentence(sentence):
     res, trie = parse_sentence(sentence)
