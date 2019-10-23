@@ -58,4 +58,4 @@ txt2 = """
                                             (txt, "sentence_similarity")])
 def test_summarize(app, text, rank):
     with app.app_context():
-        print(summarize(text, rank=rank))
+        print(summarize(text, rank=rank, alpha=1.0))

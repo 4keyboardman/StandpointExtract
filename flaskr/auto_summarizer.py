@@ -195,7 +195,11 @@ def parse_entity(sentence):
     return nh_entity, n_entity
 
 
-def cand_idx(sentences, score, n):
+def build_sentence(sentences, idx):
+    return ''.join([sentences[i] for i in sorted(idx)])
+
+
+def cand_idx(sentences, score, n, alpha=1.0):
     """ 选取候选句子索引 """
     m = 0
     idx = []
@@ -216,20 +220,19 @@ def cand_idx(sentences, score, n):
         selected_sentence = apply_reference_resolution(selected_sentence, sentences[:selected[0]])
         sentences[selected[0]] = selected_sentence
         m += len(sentences[selected[0]])
-        # 考虑冗余度，实际结果后面的句子有点偏题
         # 根据句子相似度更新句子分数，减少选取句子之间的冗余度
-        # for i, v in enumerate(score):
-        #     sim = sif_model.sentence_similarity(sentences[selected[0]], sentences[v[0]])
-        #     s = v[1] - selected[1] * sim
-        #     score[i] = (v[0], s)
-        # apply_softmax(score)
+        if alpha < 1.0:
+            for i, v in enumerate(score):
+                sim = sif_model.sentence_similarity(build_sentence(sentences, idx), sentences[v[0]])
+                s = alpha * v[1] - (1 - alpha) * selected[1] * sim
+                score[i] = (v[0], s)
     return idx
 
 
-def summarize(text, n=None, ratio=0.2, rank='sentence_rank'):
+def summarize(text, ratio, rank, alpha, n=None):
     sentences = cut_sentences(text)
     score = eval(rank)(sentences)
     if not n:
         n = int(len(text) * ratio)
-    idx = cand_idx(sentences, score, n)
-    return ''.join([sentences[i] for i in sorted(idx)])
+    idx = cand_idx(sentences, score, n, alpha)
+    return build_sentence(sentences, idx)
