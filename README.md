@@ -52,7 +52,7 @@
 
 句子评分及摘要长度参数设置：
 
-        GET /auto_summarizer?rank={rank}&ratio={ratio}
+        GET /auto_summarizer?rank={rank}&ratio={ratio}&alpha={alpha}
             rank: 评分方法
                 sentence_rank：方法一
                 text_rank：方法二
