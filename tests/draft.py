@@ -1,4 +1,7 @@
-import re
+import os
 
-
-print(re.sub(r'（.*）', '', 'Soundgarden（声音花园）乐队以及Audioslave乐队主唱Chris Cornell有关，'))
+current_path = __file__
+print(os.getcwd())
+print(current_path)
+print(os.path.dirname(current_path))
+print(os.path.abspath(os.path.join(os.path.dirname(current_path), '..')))

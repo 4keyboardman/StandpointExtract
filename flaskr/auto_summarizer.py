@@ -55,7 +55,7 @@ def sentence_similarity(sentences):
     sen_score = {}
     for i, s in enumerate(sentences):
         sen2vec = sif_model.sentence2vec([s])
-        sen_score[i] = sif_model.similarity(doc2vec, sen2vec)
+        sen_score[i] = cosine_similarity(doc2vec, sen2vec)
     return sen_score
 
 

@@ -169,23 +169,7 @@ class SIFModel:
             s2_embdding = self.sentence2vec(s2)
         else:
             s2_embdding = self.sentence2vec([s2])
-        return self.similarity(s1_embdding, s2_embdding)
-
-    @staticmethod
-    def similarity(emb1, emb2):
-        """
-        计算两个向量余弦相似度
-        :param emb1:
-        :param emb2:
-        :return:
-        """
-        inn = (emb1 * emb2).sum()
-        emb1norm = np.sqrt((emb1 * emb1).sum())
-        emb2norm = np.sqrt((emb2 * emb2).sum())
-        if emb1norm == 0 or emb2norm == 0:
-            return 0
-        scores = inn / emb1norm / emb2norm
-        return scores
+        return cosine_similarity(s1_embdding, s2_embdding)
 
     def sentence2vec(self, sentences):
         """
