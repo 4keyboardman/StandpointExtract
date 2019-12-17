@@ -57,8 +57,16 @@ def cosine_similarity(emb1, emb2):
     return scores
 
 
+def softmax(x):
+    if type(x) == list:
+        x = np.array(x)
+    e_x = np.exp(x - np.max(x))  # 防止exp()数值溢出
+    return e_x / e_x.sum(axis=0)
+
+
 def elapsed(func):
     """ 函数执行时间 """
+
     def wrapper(*args, **kwargs):
         t = time.time()
         res = func(*args, **kwargs)

@@ -8,6 +8,7 @@ from flask import Flask
 from gensim.models import Word2Vec
 
 from flaskr.hierarchical_clustering import ClusterModel
+from flaskr.boolean_search import SearchEngine
 
 ENCODING = 'utf-8'
 
@@ -108,7 +109,7 @@ class NLPModel:
     """
 
     def __init__(self, word2vec_model, say_words, stop_words, sif_model, speck_model, text_summarization_rules,
-                 qa_corpus_csv, qa_corpus_vec):
+                 cluster_model, search_engine):
         self.speck_model = speck_model
         self.sif_model = sif_model
         self.stop_words = stop_words
@@ -121,7 +122,8 @@ class NLPModel:
         # 文本摘要
         self.text_summarization_rules = text_summarization_rules
         # chatbot
-        self.cluster = ClusterModel(sif_model, qa_corpus_csv, qa_corpus_vec)
+        self.cluster = cluster_model
+        self.search_engine = search_engine
 
         # 默认设置
         self.extractor = self.speck_sif_extractor
@@ -178,9 +180,12 @@ def init_model(app: Flask):
     app.logger.info("load text summarization rules: {}".format(text_summarization_rules_path))
     text_summarization_rules = load_text_summarization_rules(text_summarization_rules_path)
 
-    # chatbot预料
+    # chatbot
     qa_corpus_csv = os.path.join(instance_path, 'qa_corpus.csv')
     qa_corpus_vec = os.path.join(instance_path, 'qa_corpus_vec.txt')
+    cluster_model = ClusterModel(sif_model, qa_corpus_csv, qa_corpus_vec)
+    search_engine = SearchEngine(qa_corpus_csv)
+
     app.nlp_model = NLPModel(word2vec_model, say_words, stop_words, sif_model, speck_model, text_summarization_rules,
-                             qa_corpus_csv, qa_corpus_vec)
+                             cluster_model, search_engine)
     app.logger.info("initialize over.")

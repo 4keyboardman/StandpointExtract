@@ -1,7 +1,5 @@
 import os
 
-current_path = __file__
-print(os.getcwd())
-print(current_path)
-print(os.path.dirname(current_path))
-print(os.path.abspath(os.path.join(os.path.dirname(current_path), '..')))
+l = [1, 2, 3]
+a = [4,5,6]
+print([(i, j) for i, j in zip(reversed(l), reversed(a))])

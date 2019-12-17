@@ -18,5 +18,5 @@ def index():
 def receive():
     message = request.form['message']
     res = chatbot.handle(message)
-    reply = [{"question": i[0], "answer": i[1], "distance": i[2]} for i in res]
+    reply = [{"answer": i[0], "score": i[1]} for i in res]
     return json.dumps(reply)
