@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+    <base href="../static/"/>
+    <title>4km</title>
+    <link rel="icon" href="favicon.ico">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="bootstrap.min.css"/>
+    <style type="text/css">
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+            font-family: "Micrsofot Yahei";
+        }
+
+        #input textarea {
+            background: rgba(0, 0, 0, 0);
+            resize: none;
+            outline: 0;
+        }
+
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        /* 这是针对缺省样式 (必须的) */
+        ::-webkit-scrollbar-track {
+            background-color: rgba(0, 0, 0, 0);
+            border-radius: 10px;
+        }
+
+        /* 滚动条的滑轨背景颜色 */
+        ::-webkit-scrollbar-thumb {
+            background-color: rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        /* 滑块颜色 */
+        ::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(0, 0, 0, 0.3);
+        }
+
+        /* 滑块颜色 */
+        ::-webkit-scrollbar-corner {
+            background-color: rgba(0, 0, 0, 0);
+        }
+
+        /* 横向滚动条和纵向滚动条相交处尖角的颜色 */
+        #message ul {
+            list-style-type: none;
+        }
+
+        .user {
+            margin-top: 10px;
+            padding-left: 10px;
+            display: block;
+            clear: both;
+            overflow: hidden;
+            float: right;
+            margin-bottom: 5px;
+        }
+
+        .chatbot {
+            width: 80%;
+            display: block;
+            clear: both;
+            float: left;
+            margin-bottom: 5px;
+        }
+
+        .user img {
+            float: right;
+            width: 34px;
+            height: 34px;
+            border-radius: 2px;
+        }
+
+        .user span {
+            background: #9eea6a;
+            padding: 7px;
+            border-radius: 4px;
+            margin: 0 10px;
+            max-width: 80%;
+            border: 1px solid #9eea6a;
+            position: relative;
+            float: right;
+            word-break: break-all;
+        }
+
+        .user span:before {
+            content: " ";
+            position: absolute;
+            top: 9px;
+            right: 100%;
+            border: 6px solid transparent;
+            border-left-color: #9eea6a;
+            left: 100%;
+        }
+
+        .chatbot img {
+            float: left;
+            width: 34px;
+            height: 34px;
+            border-radius: 2px;
+        }
+
+        .chatbot span {
+            background: #fff;
+            padding: 7px;
+            border-radius: 4px;
+            float: left;
+            margin: 0 10px;
+            max-width: 80%;
+            border: 1px solid #ededed;
+            position: relative;
+            word-break: break-all;
+        }
+
+        .chatbot span:before {
+            content: "";
+            position: absolute;
+            top: 9px;
+            right: 100%;
+            border: 6px solid transparent;
+            border-right-color: #fff;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        #panel {
+            min-width: 300px;
+            max-width: 1000px;
+            background: #f5f5f5
+        }
+
+        @media only screen and (min-width: 768px) {
+            #panel {
+                height: 80%;
+            }
+        }
+
+        @media only screen and (max-width: 768px) {
+            #panel {
+                height: 95%;
+            }
+        }
+
+        @media only screen and (max-width: 576px) {
+            #panel {
+                height: 99%;
+            }
+        }
+    </style>
+    <title>Hello, world!</title>
+</head>
+
+<body>
+<div class="container-fluid p-0 h-100 d-flex flex-column">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <!-- Navbar content -->
+        <a class="navbar-brand" href="#">自然语言处理</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">言论提取</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/auto_summarizer">自动摘要</a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" href="javascript:void(0)">聊天机器人</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="d-flex justify-content-center align-items-center h-100 px-2">
+        <div id="panel" class="d-flex flex-row rounded shadow w-75">
+            <div class="p-0 bg-dark rounded-left text-light d-none d-md-block" style="width: 250px;">
+                <div class="d-flex flex-row p-3 mt-3">
+                    <img class="mr-3" src="user.jpg" alt="4km"/>
+                    <h5 class="d-flex m-0 align-self-center text-light">Wall-E</h5>
+                </div>
+                <hr class="bg-secondary w-100 m-0"/>
+            </div>
+
+            <div class="bg-dark rounded-left text-light d-none d-sm-block d-md-none" style="width: 72px;">
+                <div class="d-flex flex-row p-3">
+                    <img class="mr-3" src="user.jpg" alt="4km"/>
+                </div>
+            </div>
+
+            <div class="d-flex flex-column h-100 w-100 p-0 border rounded">
+                <h5 class="mt-4 ml-3 mb-2">eve</h5>
+                <hr class="bg-light w-100 m-0"/>
+                <div id="message" class="overflow-hidden h-75" style="padding-right: 5px;">
+                    <ul class="list-group m-3">
+                        <li class="chatbot">
+                            <img src="chatbot.jpg"/><span>Hi~这里是银行客服机器人eve，请问有什么可以帮到您？</span>
+                        </li>
+                    </ul>
+                </div>
+                <hr class="bg-light w-100 m-0"/>
+                <div id="input" class="d-flex flex-column p-3" style="height: 25%;">
+                    <textarea class="w-100 flex-grow-1 border-0" placeholder=""></textarea>
+                    <div class="d-flex justify-content-end">
+                        <button id="send" class="btn btn-sm btn-outline-success">
+                            发送(S)
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="page-footer font-small blue border-top d-none d-md-block">
+        <!-- Copyright -->
+        <div class="footer-copyright text-center py-3">
+            © 2019 Copyright:
+            <a href="https://github.com/4keyboardman/StandpointExtract"> 4keyboardman</a>
+        </div>
+        <!-- Copyright -->
+    </footer>
+</div>
+
+<!-- Optional JavaScript -->
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="jquery-3.4.1.min.js"></script>
+<script src="popper.min.js"></script>
+<script src="bootstrap.min.js"></script>
+<script type="text/javascript">
+    $(function () {
+        if (localStorage.history) {
+            $("#message ul").append(localStorage.history);
+        } else {
+            localStorage.history = '';
+        }
+
+        $("#message").animate({scrollTop: 10000}, 3000);
+    });
+
+    $("#message")
+        .mouseenter(function () {
+            if ($("#message").height() < $("#message ul").height()) {
+                $("#message").removeClass("overflow-hidden").addClass("overflow-auto").css("padding-right", "0px");
+            }
+
+        })
+        .mouseleave(function () {
+            $("#message").removeClass("overflow-auto").addClass("overflow-hidden").css("padding-right", "5px");
+        });
+
+    $("#input textarea")
+        .focus(function () {
+            $("#input").addClass("bg-white");
+        })
+        .blur(function () {
+            $("#input").removeClass("bg-white");
+        });
+
+    $("#send").click(function () {
+        var $input = $("#input textarea");
+        var msg = $input.val();
+        if (msg.length > 0) {
+            var li = '<li class="user"><img src="user.jpg" /><span class="hidden">' + msg + "</span></li>"
+            $("#message ul").append(li);
+            showMsg($("#message .user .hidden"));
+            localStorage.history = localStorage.history + li.replace("hidden", "");
+
+            $.post('/chatbot', {
+                message: msg
+            }, function (data) {
+                if (data.length > 0) {
+                    JSON.parse(data).forEach(function (reply) {
+                        var li = '<li class="chatbot"><img src="chatbot.jpg" /><span class="hidden">' + reply.answer + "</span></li>"
+                        $("#message ul").append(li);
+                        showMsg($("#message .chatbot .hidden"));
+                        localStorage.history = localStorage.history + li.replace("hidden", "");
+                    })
+                }
+
+            })
+        }
+
+        $input.val("").focus();
+    });
+
+    function showMsg($hidden) {
+        $hidden.show({
+            duration: 200,
+            queue: false
+        });
+        $("#message").animate({
+            scrollTop: 10000
+        }, {
+            duration: 2000,
+            queue: false
+        });
+    }
+
+</script>
+</body>
+
+</html>
