@@ -21,3 +21,17 @@ def set_extractor(model):
 def get_extractor():
     extractor = current_app.nlp_model.extractor
     return 'rnn' if type(extractor) == SpeckExtractor else 'sif'
+
+
+@bp.route('/chatbot/threshold/<value>', methods=["GET"])
+def set_chatbot_threshold(value):
+    try:
+        current_app.nlp_model.chatbot.threshold = float(value)
+        return 'success'
+    except ValueError:
+        return 'error'
+
+
+@bp.route('/chatbot/threshold', methods=["GET"])
+def get_chatbot_threshold():
+    return str(current_app.nlp_model.chatbot.threshold)

@@ -7,8 +7,6 @@ from flaskr import extractor
 from flask import Flask
 from gensim.models import Word2Vec
 
-from flaskr.hierarchical_clustering import ClusterModel
-from flaskr.boolean_search import SearchEngine
 
 ENCODING = 'utf-8'
 
@@ -109,7 +107,7 @@ class NLPModel:
     """
 
     def __init__(self, word2vec_model, say_words, stop_words, sif_model, speck_model, text_summarization_rules,
-                 cluster_model, search_engine):
+                 chatbot):
         self.speck_model = speck_model
         self.sif_model = sif_model
         self.stop_words = stop_words
@@ -122,8 +120,7 @@ class NLPModel:
         # 文本摘要
         self.text_summarization_rules = text_summarization_rules
         # chatbot
-        self.cluster = cluster_model
-        self.search_engine = search_engine
+        self.chatbot = chatbot
 
         # 默认设置
         self.extractor = self.speck_sif_extractor
@@ -181,11 +178,18 @@ def init_model(app: Flask):
     text_summarization_rules = load_text_summarization_rules(text_summarization_rules_path)
 
     # chatbot
+    from flaskr.hierarchical_clustering import ClusterModel
+    from flaskr.boolean_search import SearchEngine
     qa_corpus_csv = os.path.join(instance_path, 'qa_corpus.csv')
     qa_corpus_vec = os.path.join(instance_path, 'qa_corpus_vec.txt')
     cluster_model = ClusterModel(sif_model, qa_corpus_csv, qa_corpus_vec)
     search_engine = SearchEngine(qa_corpus_csv)
+    from flaskr.chatbot_template_generator import Generator
+    chatbot_template = os.path.join(instance_path, 'chatbot_template.json')
+    template_generator = Generator(chatbot_template)
+    from flaskr.chatbot import Chatbot
+    chatbot = Chatbot(cluster_model, search_engine, template_generator)
 
     app.nlp_model = NLPModel(word2vec_model, say_words, stop_words, sif_model, speck_model, text_summarization_rules,
-                             cluster_model, search_engine)
+                             chatbot)
     app.logger.info("initialize over.")

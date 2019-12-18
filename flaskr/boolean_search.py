@@ -48,8 +48,10 @@ class SearchEngine:
         布尔搜索
         """
         words = cut(query)
-        candidates_ids = [self.word_2_id[w] for w in words]
+        candidates_ids = [self.word_2_id[w] for w in words if w in self.word_2_id]
         documents_ids = [set(np.where(self.transposed_x[_id])[0]) for _id in candidates_ids]
+        if len(documents_ids) == 0:
+            return []
         merged_documents = reduce(and_, documents_ids)
         query_vec = self.vectorized.transform([' '.join(words)]).toarray()[0]
         # 按距离排序
