@@ -13,5 +13,3 @@ def test_search_engine(source, query):
     for i in res:
         print(i)
         print('*' * 50)
-    dist_2_prob(res)
-    print(res)

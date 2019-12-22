@@ -9,23 +9,37 @@ def handle(message):
     chatbot = current_app.nlp_model.chatbot
     cluster = chatbot.cluster
     search_engine = chatbot.search_engine
+    cluster_threshold = chatbot.cluster_threshold
+    cluster_nearest = chatbot.cluster_nearest
+    search_threshold = chatbot.search_threshold
     # 聚类
     cluster_res = cluster(message, 10)
-    cluster_res = dist_2_prob(reversed(cluster_res))
+    # 如果有非常接近的问题，则优先取些句子
+    nearest = set([i[1] for i in cluster_res if i[2] < cluster_nearest])
+    if len(nearest) > 0:
+        return random_choose(nearest)
     # 搜索
     search_res = search_engine(message, 10)
-    search_res = dist_2_prob(reversed(search_res))
-    # 综合聚类和搜索结果排序
-    reply = score(cluster_res, search_res)
-    # 随机取top1-3句
-    reply = reply[:random.randint(1, 3)]
-    # 过滤得分低的句子
-    reply = [i for i in reply if i[1] >= chatbot.threshold]
+    # 过滤
+    cluster_res = [i[1] for i in cluster_res if i[2] < cluster_threshold]
+    search_res = [i[1] for i in search_res if i[2] < search_threshold]
+    # 去重
+    cands = set(cluster_res + search_res)
     # 没有找到句子，使用模板生成文本
-    if len(reply) == 0:
-        generate_text = chatbot.template_generator(message, 200)
-        reply = [(generate_text, 0)]
+    if len(cands) == 0:
+        reply = chatbot.template_generator(message, random.randint(10, 600))
+    else:
+        # 随机取聚类和搜索top1-3句
+        reply = random_choose(cands)
     return reply
+
+
+def random_choose(s, n=3):
+    res = list(s)
+    random.shuffle(res)
+    if len(res) >= n:
+        res = res[:random.randint(1, n)]
+    return res
 
 
 def dist_2_prob(qa_dists):
@@ -53,8 +67,11 @@ def score(cluster_res, search_res):
 
 
 class Chatbot:
-    def __init__(self, cluster, search_engine, template_generator, threshold=0.1):
+    def __init__(self, cluster, search_engine, template_generator, cluster_threshold=10, cluster_nearest=3,
+                 search_threshold=0.5):
         self.cluster = cluster
         self.search_engine = search_engine
         self.template_generator = template_generator
-        self.threshold = threshold  # 得分阈值
+        self.cluster_threshold = cluster_threshold
+        self.cluster_nearest = cluster_nearest
+        self.search_threshold = search_threshold

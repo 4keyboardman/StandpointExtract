@@ -49,7 +49,8 @@ class ClusterModel:
 
     def __call__(self, sentence, k=1):
         """ 找出与给定句子相似的topk个问题 """
-        dist, ind = self.tree.query(self.sen2vec.sentence2vec([sentence]).reshape(1, -1), k=k)
+        x = self.sen2vec.sentence2vec([sentence]).reshape(1, -1)
+        dist, ind = self.tree.query(x, k=k)
         res = []
         indices = [self._indices[i] for i in ind[0]]
         for i, e in enumerate(indices):
