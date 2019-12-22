@@ -35,12 +35,27 @@ class Generator:
         xx = xx.replace("b", random.choice(self.after))
         return xx
 
-    def __call__(self, title, length):
+    def check_end(self, text):
+        while not text.endswith("。"):
+            text += next(self.next_bosh)
+        return text
+
+    def __call__(self, title, max_length):
+        res = []
+        text_length = 0
         text = str()
-        while len(text) < length:
+        while text_length < max_length:
             n = random.randint(0, 100)
-            if n < 20:
+            if n < 5:
+                text = self.check_end(text)
+                text_length += len(text)
+                res.append(text)
+                text = str()
+            elif n < 20:
                 text += self.get_famous()
             else:
                 text += next(self.next_bosh)
-        return text.replace("x", title)
+        if len(text) > 0:
+            text = self.check_end(text)
+            res.append(text)
+        return [text.replace("x", title) for text in res]

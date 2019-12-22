@@ -17,6 +17,6 @@ def index():
 @bp.route('/chatbot', methods=["POST"])
 def receive():
     message = request.form['message']
-    res = chatbot.handle(message)
-    reply = [{"answer": i[0], "score": i[1]} for i in res]
+    res = chatbot.handle(message.strip())
+    reply = [{"answer": i} for i in res]
     return json.dumps(reply)

@@ -23,15 +23,29 @@ def get_extractor():
     return 'rnn' if type(extractor) == SpeckExtractor else 'sif'
 
 
-@bp.route('/chatbot/threshold/<value>', methods=["GET"])
+@bp.route('/chatbot/cluster/threshold/<value>', methods=["GET"])
 def set_chatbot_threshold(value):
     try:
-        current_app.nlp_model.chatbot.threshold = float(value)
+        current_app.nlp_model.chatbot.cluster_threshold = float(value)
         return 'success'
     except ValueError:
         return 'error'
 
 
-@bp.route('/chatbot/threshold', methods=["GET"])
-def get_chatbot_threshold():
-    return str(current_app.nlp_model.chatbot.threshold)
+@bp.route('/chatbot/cluster/threshold', methods=["GET"])
+def get_cluster_threshold():
+    return str(current_app.nlp_model.chatbot.cluster_threshold)
+
+
+@bp.route('/chatbot/search/threshold/<value>', methods=["GET"])
+def set_search_threshold(value):
+    try:
+        current_app.nlp_model.chatbot.search_threshold = float(value)
+        return 'success'
+    except ValueError:
+        return 'error'
+
+
+@bp.route('/chatbot/search/threshold', methods=["GET"])
+def get_search_threshold():
+    return str(current_app.nlp_model.chatbot.search_threshold)

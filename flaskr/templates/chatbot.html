@@ -285,7 +285,7 @@
             }, function (data) {
                 if (data.length > 0) {
                     JSON.parse(data).forEach(function (reply) {
-                        var li = '<li class="chatbot"><img src="chatbot.jpg" /><span class="hidden">' + reply.answer + "</span></li>"
+                        var li = '<li class="chatbot"><img src="chatbot.jpg" /><span class="hidden" style="display:inline">' + reply.answer + "</span></li>"
                         $("#message ul").append(li);
                         showMsg($("#message .chatbot .hidden"));
                         localStorage.history = localStorage.history + li.replace("hidden", "");

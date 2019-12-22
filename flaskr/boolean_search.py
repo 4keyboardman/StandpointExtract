@@ -5,8 +5,7 @@ from operator import and_
 
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import euclidean_distances
-from sklearn.neighbors import DistanceMetric
+from scipy.spatial.distance import cosine
 
 from flaskr.utils import *
 
@@ -25,7 +24,7 @@ def load_tfidf_model(source):
 
 
 def distance(v1, v2):
-    return euclidean_distances(v1, v2)
+    return cosine(v1, v2[0])
 
 
 class SearchEngine:
@@ -55,6 +54,7 @@ class SearchEngine:
         merged_documents = reduce(and_, documents_ids)
         query_vec = self.vectorized.transform([' '.join(words)]).toarray()[0]
         # 按距离排序
-        doc_dist = [(self.questions[i], self.answers[i], distance([query_vec], self.X[i].toarray())[0, 0]) for i in merged_documents]
+        doc_dist = [(self.questions[i], self.answers[i], distance(query_vec, self.X[i].toarray())) for i
+                    in merged_documents]
         sorted_doc = sorted(doc_dist, key=lambda i: i[2])
         return sorted_doc[:k]
