@@ -49,3 +49,17 @@ def set_search_threshold(value):
 @bp.route('/chatbot/search/threshold', methods=["GET"])
 def get_search_threshold():
     return str(current_app.nlp_model.chatbot.search_threshold)
+
+
+@bp.route('/chatbot/cluster/nearest/<value>', methods=["GET"])
+def set_chatbot_nearest(value):
+    try:
+        current_app.nlp_model.chatbot.cluster_nearest = float(value)
+        return 'success'
+    except ValueError:
+        return 'error'
+
+
+@bp.route('/chatbot/cluster/nearest', methods=["GET"])
+def get_cluster_nearest():
+    return str(current_app.nlp_model.chatbot.cluster_nearest)
