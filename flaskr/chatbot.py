@@ -9,9 +9,17 @@ def handle(message):
     chatbot = current_app.nlp_model.chatbot
     cluster = chatbot.cluster
     search_engine = chatbot.search_engine
+    nn_chatbot = chatbot.nn_chatbot
     cluster_threshold = chatbot.cluster_threshold
     cluster_nearest = chatbot.cluster_nearest
     search_threshold = chatbot.search_threshold
+
+    # 如果不包含中文则先当英文处理
+    if not is_contains_chinese(message):
+        reply = nn_chatbot(message)
+        if reply and len(reply) > 0:
+            return reply
+
     # 聚类
     cluster_res = cluster(message, 10)
     # 如果有非常接近的问题，则优先取些句子
@@ -27,11 +35,20 @@ def handle(message):
     cands = set(cluster_res + search_res)
     # 没有找到句子，使用模板生成文本
     if len(cands) == 0:
-        reply = chatbot.template_generator(message, random.randint(10, 600))
+        reply = nn_chatbot(message)
+        if reply and len(reply) > 0:
+            return reply
+        return chatbot.template_generator(message, random.randint(10, 600))
     else:
         # 随机取聚类和搜索top1-3句
-        reply = random_choose(cands)
-    return reply
+        return random_choose(cands)
+
+
+def is_contains_chinese(strs):
+    for _char in strs:
+        if '\u4e00' <= _char <= '\u9fa5':
+            return True
+    return False
 
 
 def random_choose(s, n=3):
@@ -68,7 +85,8 @@ def score(cluster_res, search_res):
 
 class Chatbot:
     def __init__(self, cluster, search_engine, template_generator, cluster_threshold=10, cluster_nearest=3,
-                 search_threshold=0.5):
+                 search_threshold=0.5, nn_chatbot=None):
+        self.nn_chatbot = nn_chatbot
         self.cluster = cluster
         self.search_engine = search_engine
         self.template_generator = template_generator

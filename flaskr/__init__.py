@@ -53,7 +53,7 @@ def create_app(test_config=None):
         app.logger.info(request_info)
 
     # apply the blueprints to the app
-    from flaskr import extract_router, cmd_router, auto_summarizer_router,chatbot_router
+    from flaskr import extract_router, cmd_router, auto_summarizer_router, chatbot_router
     # 注册蓝图
     app.register_blueprint(extract_router.bp)
     app.register_blueprint(cmd_router.bp)
