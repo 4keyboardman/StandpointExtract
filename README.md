@@ -2,7 +2,7 @@
 
 #### 安装说明： [INSTANLL.md](./INSTALL.md)
 
-## 项目一： 新闻人物言论自动提取
+## 新闻人物言论自动提取
 程序入口：extract_router.py
 
 解决思路：
@@ -23,7 +23,7 @@
 
 详见：[project1.md](./project1.md)
 
-## 项目二： 文本摘要-无监督抽取式
+## 文本摘要-无监督抽取式
 程序入口：auto_summarizer_router.py
 
 解决思路：
@@ -60,7 +60,7 @@
             ratio: 摘要长度与文本长度比例，默认0.2
             alpha: 冗余度系数，减少摘要句子之间的冗余度，(0, 1]，系数越大，冗余度越高，1表示不考虑冗余，默认1
 
-## 项目三： 聊天机器人
+## 聊天机器人
 程序入口：chatbot_router.py
 
 解决思路：
@@ -70,5 +70,13 @@
 
         1. 如果通过聚类找到的句子距离较近（此值可以设置），则直接作为候选句子，然后随机选择1-3个句子返回
         2. 根据聚类和布尔搜索的阈值（这两个值都可以设置）过滤，然后去重合并两个方法的结果，从中随机选择1-3个句子返回
-        3. 经过步骤2过滤后，没有候选句子，则使用模板方法生成回复，模板方法参考狗屁不通文本生成器(https://github.com/menzi11/BullshitGenerator)，后续计划使用基于知识图谱的文本生成
+        3. 经过步骤2过滤后，没有候选句子，则：
+            - 使用attention-seq2seq生成英文回复，参考(https://github.com/ywk991112/pytorch-chatbot)
+            - 模板方法生成回复，模板方法参考狗屁不通文本生成器(https://github.com/menzi11/BullshitGenerator)
+        
+阈值参数设置：
+
+        GET /chatbot/cluster/nearest/<value> 聚类结果直接返回的阈值设置
+        GET /chatbot/cluster/threshold/<value> 聚类阈值设置
+        GET /chatbot/search/threshold/<value> 布尔搜索阈值设置
 
