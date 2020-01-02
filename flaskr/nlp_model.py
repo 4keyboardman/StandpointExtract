@@ -178,6 +178,7 @@ def init_model(app: Flask):
     text_summarization_rules = load_text_summarization_rules(text_summarization_rules_path)
 
     # chatbot
+    app.logger.info("load chatbot model...")
     from flaskr.hierarchical_clustering import ClusterModel
     from flaskr.boolean_search import SearchEngine
     qa_corpus_csv = os.path.join(instance_path, 'qa_corpus.csv')
@@ -187,8 +188,14 @@ def init_model(app: Flask):
     from flaskr.chatbot_template_generator import Generator
     chatbot_template = os.path.join(instance_path, 'chatbot_template.json')
     template_generator = Generator(chatbot_template)
+    from attention_chatbot import AttentionChatbot
+    nn_chatbot = AttentionChatbot(os.path.join(instance_path, '50000_backup_bidir_model.tar'),
+                                  os.path.join(instance_path, 'movie_subtitles.txt'),
+                                  os.path.join(instance_path, 'pairs.tar'),
+                                  os.path.join(instance_path, 'voc.tar'))
+
     from flaskr.chatbot import Chatbot
-    chatbot = Chatbot(cluster_model, search_engine, template_generator)
+    chatbot = Chatbot(cluster_model, search_engine, template_generator, nn_chatbot=nn_chatbot)
 
     app.nlp_model = NLPModel(word2vec_model, say_words, stop_words, sif_model, speck_model, text_summarization_rules,
                              chatbot)

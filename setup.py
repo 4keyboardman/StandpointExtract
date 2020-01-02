@@ -19,6 +19,6 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=["flask", 'pyhanlp', 'gensim', 'scikit-learn', 'numpy', 'jieba', 'mxnet', 'networkx', 'scipy',
-                      'pandas'],
+                      'pandas', 'torch'],
     extras_require={"test": ["pytest", "coverage"]},
 )

@@ -4,6 +4,7 @@ import pytest
 
 from flaskr import create_app
 from flaskr import nlp_model
+from attention_chatbot import AttentionChatbot
 
 os.chdir("..")
 
@@ -57,3 +58,11 @@ def speck_model(request):
 @pytest.fixture(scope="session")
 def sif_model(stop_words, word2vec_model):
     return nlp_model.load_sif_model(word2vec_model, stop_words)
+
+
+@pytest.fixture(scope="session", params=[(r"instance/50000_backup_bidir_model.tar",
+                                          r"instance/movie_subtitles.txt",
+                                          r"data/save/training_data/movie_subtitles/pairs.tar",
+                                          r"data/save/training_data/movie_subtitles/voc.tar")])
+def attention_chatbot(request):
+    return AttentionChatbot(*request.param)
